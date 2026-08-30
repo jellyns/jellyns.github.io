@@ -1,11 +1,10 @@
 ---
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+import { SITE_AUTHOR, SITE_DESCRIPTION } from '../../consts';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
@@ -15,101 +14,175 @@ const posts = (await getCollection('blog')).sort(
 <!doctype html>
 <html lang="zh-CN">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			main {
-				width: 960px;
-			}
-			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
-			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul li:first-child img {
-				width: 100%;
-			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
-			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-			}
-			ul li a {
-				display: block;
-			}
-			.title {
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
-			}
-			.date {
-				margin: 0;
-				color: rgb(var(--gray));
-			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
-			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
-			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
-				}
-				ul li {
-					width: 100%;
-					text-align: center;
-				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
-				}
-			}
-		</style>
+		<BaseHead title={`blog · ${SITE_AUTHOR}`} description={SITE_DESCRIPTION} />
 	</head>
 	<body>
 		<Header />
-		<main>
-			<h1>文章</h1>
-			<section>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>
-									{post.data.heroImage && (
-										<Image width={720} height={360} src={post.data.heroImage} alt="" />
-									)}
-									<h4 class="title">{post.data.title}</h4>
-									<p class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
+		<main id="main-content" class="archive-main">
+			<header class="archive-intro">
+				<h1>blog</h1>
+				<p>正式发布的文章，按时间排列。</p>
+			</header>
+
+			<section class="archive-ledger" aria-label="全部文章">
+				<div class="ledger-head" aria-hidden="true">
+					<span>序号</span>
+					<span>日期</span>
+					<span>文章</span>
+					<span></span>
+				</div>
+				{
+					posts.length > 0 ? (
+						<ol>
+							{posts.map((post, index) => (
+								<li>
+									<a href={`/blog/${post.id}/`}>
+										<span class="entry-number">
+											{String(posts.length - index).padStart(3, '0')}
+										</span>
+										<span class="entry-date">
+											<FormattedDate date={post.data.pubDate} format="compact" />
+										</span>
+										<span class="entry-copy">
+											<h2>{post.data.title}</h2>
+											<p>{post.data.description}</p>
+										</span>
+										<span class="entry-arrow" aria-hidden="true">↗</span>
+									</a>
+								</li>
+							))}
+						</ol>
+					) : (
+						<p class="empty-state">还没有公开文章。</p>
+					)
+				}
 			</section>
 		</main>
 		<Footer />
 	</body>
 </html>
+
+<style>
+	.archive-main {
+		width: min(var(--site-width), calc(100% - 2 * var(--page-gutter)));
+		margin-inline: auto;
+		padding-top: clamp(4.5rem, 10vw, 7.5rem);
+	}
+	.archive-intro {
+		display: grid;
+		grid-template-columns: 13rem 1fr;
+		gap: 2rem;
+		align-items: baseline;
+		padding-bottom: clamp(3rem, 7vw, 5rem);
+	}
+	.archive-intro h1 {
+		margin: 0;
+		font-size: clamp(2.8rem, 6vw, 4.5rem);
+		letter-spacing: -0.04em;
+		line-height: 1;
+	}
+	.archive-intro p {
+		margin: 0;
+		color: var(--muted);
+		font-size: 0.95rem;
+	}
+	.archive-ledger {
+		border-top: 1px solid var(--ink);
+	}
+	.ledger-head,
+	.archive-ledger a {
+		display: grid;
+		grid-template-columns: 4.5rem 8.5rem minmax(0, 1fr) 2rem;
+		gap: 1.5rem;
+	}
+	.ledger-head {
+		padding-block: 0.7rem;
+		border-bottom: 1px solid var(--line);
+		color: var(--muted);
+		font-size: 0.68rem;
+	}
+	ol {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	li {
+		border-bottom: 1px solid var(--line);
+	}
+	.archive-ledger a {
+		align-items: start;
+		padding-block: 2.15rem 2.3rem;
+		color: var(--ink);
+		text-decoration: none;
+	}
+	.entry-number,
+	.entry-date {
+		padding-top: 0.35rem;
+		font-size: 0.78rem;
+	}
+	.entry-number { color: var(--accent); }
+	.entry-date { color: var(--muted); }
+	.entry-copy h2 {
+		margin: 0;
+		font-size: clamp(1.45rem, 3vw, 2rem);
+		letter-spacing: -0.025em;
+		word-break: auto-phrase;
+		transition: color 180ms ease-out;
+	}
+	.entry-copy p {
+		margin: 0.65rem 0 0;
+		color: var(--muted);
+		font-size: 0.88rem;
+	}
+	.entry-arrow {
+		padding-top: 0.1rem;
+		color: var(--accent);
+		font-size: 1.25rem;
+		text-align: right;
+		transition: transform 180ms ease-out;
+	}
+	.archive-ledger a:hover .entry-copy h2 { color: var(--accent-dark); }
+	.archive-ledger a:hover .entry-arrow { transform: translate(0.2rem, -0.2rem); }
+	.empty-state {
+		margin: 0;
+		padding-block: 2rem;
+		border-bottom: 1px solid var(--line);
+		color: var(--muted);
+	}
+
+	@media (max-width: 44rem) {
+		.archive-main { padding-top: 4rem; }
+		.archive-intro {
+			display: block;
+			padding-bottom: 3rem;
+		}
+		.archive-intro h1 { font-size: 3rem; }
+		.archive-intro p { margin-top: 1.2rem; }
+		.ledger-head { display: none; }
+		.archive-ledger a {
+			display: grid;
+			grid-template-columns: 1fr auto;
+			gap: 0.2rem 1rem;
+			padding-block: 1.45rem 1.65rem;
+		}
+		.entry-number,
+		.entry-date {
+			padding: 0;
+			font-size: 0.7rem;
+		}
+		.entry-date { text-align: right; }
+		.entry-copy {
+			grid-column: 1 / -1;
+			margin-top: 0.7rem;
+		}
+		.entry-copy h2 {
+			font-size: 1.4rem;
+			line-height: 1.4;
+		}
+		.entry-copy p {
+			font-size: 0.82rem;
+			line-height: 1.7;
+		}
+		.entry-arrow { display: none; }
+	}
+</style>

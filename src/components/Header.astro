@@ -1,60 +1,81 @@
 ---
-import { SITE_TITLE } from '../consts';
+import { SITE_AUTHOR } from '../consts';
 import HeaderLink from './HeaderLink.astro';
 ---
 
-<header>
-	<nav>
-		<h2><a href="/">{SITE_TITLE}</a></h2>
-		<div class="links">
-			<HeaderLink href="/">首页</HeaderLink>
-			<HeaderLink href="/blog">文章</HeaderLink>
-			<a href="https://github.com/jellyns" target="_blank" rel="noreferrer">GitHub</a>
+<!--
+THESIS: 以作者和真实文章建立连续写作空间，拒绝卡片模板与强制分类。
+OWN-WORLD: 冷白底、墨蓝字、蓝绿色强调、细分隔线和克制的无衬线中文排版。
+STORY: 读者先认识乙辛Zmod31，再进入最新文章或按时间浏览全部写作。
+FIRST VIEWPORT: 主页分栏呈现身份与关注方向并连接最新文章；目录使用连续索引；文章页左对齐进入正文。
+FORM: 采用已确认的 A 主页与 C 目录组合，folio/index 排位 6，staging 为 split opening + chronological ledger，seed 3fcfa4a3。
+-->
+<a class="skip-link" href="#main-content">跳到正文</a>
+<header class="site-header">
+	<nav class="site-nav" aria-label="主导航">
+		<a class="site-brand" href="/">{SITE_AUTHOR}</a>
+		<div class="site-links">
+			<HeaderLink href="/blog/">blog</HeaderLink>
+			<a href="/rss.xml">RSS</a>
 		</div>
 	</nav>
 </header>
 
 <style>
-	header {
-		margin: 0;
-		padding: 0 1em;
-		background: white;
-		box-shadow: 0 2px 8px rgba(var(--black), 5%);
+	.site-header {
+		border-bottom: 1px solid var(--line);
+		background: color-mix(in srgb, var(--paper) 94%, transparent);
 	}
-	h2 {
-		margin: 0;
-		font-size: 1em;
-	}
-	h2 a,
-	h2 a.active {
-		text-decoration: none;
-	}
-	nav,
-	.links {
+	.site-nav {
+		width: min(var(--site-width), calc(100% - 2 * var(--page-gutter)));
+		height: 5.5rem;
+		margin-inline: auto;
 		display: flex;
 		align-items: center;
-	}
-	nav {
 		justify-content: space-between;
 	}
-	.links {
-		gap: 0.25em;
-	}
-	nav a {
-		padding: 1em 0.5em;
-		color: var(--black);
-		border-bottom: 4px solid transparent;
+	.site-brand {
+		color: var(--ink);
+		font-size: 1rem;
+		font-weight: 720;
+		letter-spacing: -0.02em;
 		text-decoration: none;
 	}
-	nav a.active {
-		border-bottom-color: var(--accent);
+	.site-links {
+		display: flex;
+		align-items: center;
+		gap: 1.75rem;
 	}
-	@media (max-width: 520px) {
-		h2 {
-			display: none;
-		}
-		nav {
-			justify-content: center;
-		}
+	.site-links :global(a) {
+		position: relative;
+		padding-block: 0.35rem;
+		color: var(--muted);
+		font-size: 0.82rem;
+		text-decoration: none;
+	}
+	.site-links :global(a)::after {
+		content: '';
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		height: 1px;
+		background: var(--accent);
+		transform: scaleX(0);
+		transform-origin: right;
+		transition: transform 180ms ease-out;
+	}
+	.site-links :global(a:hover),
+	.site-links :global(a.active) {
+		color: var(--ink);
+	}
+	.site-links :global(a:hover)::after,
+	.site-links :global(a.active)::after {
+		transform: scaleX(1);
+		transform-origin: left;
+	}
+	@media (max-width: 40rem) {
+		.site-nav { height: 4.5rem; }
+		.site-links { gap: 1.15rem; }
 	}
 </style>

@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-30T22:17:37.6719937+08:00",
+  "title": "Design System: 乙辛Zmod31 · blog",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Cool Paper",
+        "canonical": "#f8faf9",
+        "tonalRamp": ["oklch(15% 0.004 165)", "oklch(27% 0.004 165)", "oklch(39% 0.004 165)", "oklch(51% 0.004 165)", "oklch(63% 0.004 165)", "oklch(75% 0.004 165)", "oklch(87% 0.004 165)", "oklch(98% 0.004 165)"]
+      },
+      "paper-strong": {
+        "role": "neutral",
+        "displayName": "White Surface",
+        "canonical": "#ffffff",
+        "tonalRamp": ["oklch(15% 0 0)", "oklch(27% 0 0)", "oklch(39% 0 0)", "oklch(51% 0 0)", "oklch(63% 0 0)", "oklch(75% 0 0)", "oklch(87% 0 0)", "oklch(100% 0 0)"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink Navy",
+        "canonical": "#152c35",
+        "tonalRamp": ["oklch(15% 0.025 220)", "oklch(27% 0.025 220)", "oklch(39% 0.025 220)", "oklch(51% 0.025 220)", "oklch(63% 0.025 220)", "oklch(75% 0.025 220)", "oklch(87% 0.025 220)", "oklch(95% 0.025 220)"]
+      },
+      "prose-ink": {
+        "role": "neutral",
+        "displayName": "Prose Ink",
+        "canonical": "#253c44",
+        "tonalRamp": ["oklch(15% 0.02 215)", "oklch(27% 0.02 215)", "oklch(39% 0.02 215)", "oklch(51% 0.02 215)", "oklch(63% 0.02 215)", "oklch(75% 0.02 215)", "oklch(87% 0.02 215)", "oklch(95% 0.02 215)"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Slate",
+        "canonical": "#5d7075",
+        "tonalRamp": ["oklch(15% 0.012 210)", "oklch(27% 0.012 210)", "oklch(39% 0.012 210)", "oklch(51% 0.012 210)", "oklch(63% 0.012 210)", "oklch(75% 0.012 210)", "oklch(87% 0.012 210)", "oklch(95% 0.012 210)"]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Fine Line",
+        "canonical": "#cdd8d7",
+        "tonalRamp": ["oklch(15% 0.008 175)", "oklch(27% 0.008 175)", "oklch(39% 0.008 175)", "oklch(51% 0.008 175)", "oklch(63% 0.008 175)", "oklch(75% 0.008 175)", "oklch(87% 0.008 175)", "oklch(95% 0.008 175)"]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Teal Accent",
+        "canonical": "#137d78",
+        "tonalRamp": ["oklch(15% 0.07 190)", "oklch(27% 0.07 190)", "oklch(39% 0.07 190)", "oklch(51% 0.07 190)", "oklch(63% 0.07 190)", "oklch(75% 0.07 190)", "oklch(87% 0.07 190)", "oklch(95% 0.07 190)"]
+      },
+      "accent-dark": {
+        "role": "primary",
+        "displayName": "Deep Teal",
+        "canonical": "#0d625e",
+        "tonalRamp": ["oklch(15% 0.06 190)", "oklch(27% 0.06 190)", "oklch(39% 0.06 190)", "oklch(51% 0.06 190)", "oklch(63% 0.06 190)", "oklch(75% 0.06 190)", "oklch(87% 0.06 190)", "oklch(95% 0.06 190)"]
+      },
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "Soft Teal",
+        "canonical": "#dceeed",
+        "tonalRamp": ["oklch(15% 0.025 190)", "oklch(27% 0.025 190)", "oklch(39% 0.025 190)", "oklch(51% 0.025 190)", "oklch(63% 0.025 190)", "oklch(75% 0.025 190)", "oklch(87% 0.025 190)", "oklch(95% 0.025 190)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Identity Display", "purpose": "Homepage author identity only." },
+      "headline": { "displayName": "Article Headline", "purpose": "Published article titles." },
+      "title": { "displayName": "Entry Title", "purpose": "Latest-post and archive-entry titles." },
+      "body": { "displayName": "Chinese Prose", "purpose": "Long-form article reading at a 43.5rem measure." },
+      "label": { "displayName": "Quiet Label", "purpose": "Dates, section labels, and supporting navigation." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "state-change", "value": "180ms ease-out", "purpose": "Navigation underline, entry title, and arrow hover changes." },
+      { "name": "opening-settle", "value": "640ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Single homepage opening motion when reduced motion is not requested." },
+      { "name": "line-draw", "value": "760ms 120ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Draws the latest-entry divider once after the opening settles." }
+    ],
+    "breakpoints": [
+      { "name": "compact-navigation", "value": "40rem" },
+      { "name": "single-column", "value": "44rem" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Site Navigation",
+      "kind": "nav",
+      "refersTo": "site-navigation",
+      "description": "Author identity with the two durable destinations: blog and RSS.",
+      "html": "<nav class=\"ds-site-nav\"><a class=\"ds-site-brand\" href=\"/\">乙辛Zmod31</a><div class=\"ds-site-links\"><a class=\"ds-site-link ds-site-link-active\" href=\"/blog/\">blog</a><a class=\"ds-site-link\" href=\"/rss.xml\">RSS</a></div></nav>",
+      "css": ".ds-site-nav { width: min(70rem, calc(100% - 2 * clamp(1.25rem, 5vw, 4rem))); height: 5.5rem; margin-inline: auto; display: flex; align-items: center; justify-content: space-between; font-family: var(--font-sans); } .ds-site-brand { color: var(--ink); font-size: 1rem; font-weight: 720; letter-spacing: -0.02em; text-decoration: none; } .ds-site-links { display: flex; gap: 1.75rem; } .ds-site-link { position: relative; padding-block: 0.35rem; color: var(--muted); font-size: 0.82rem; text-decoration: none; } .ds-site-link::after { content: ''; position: absolute; right: 0; bottom: 0; left: 0; height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: right; transition: transform 180ms ease-out; } .ds-site-link:hover, .ds-site-link-active { color: var(--ink); } .ds-site-link:hover::after, .ds-site-link-active::after { transform: scaleX(1); transform-origin: left; } .ds-site-link:focus-visible, .ds-site-brand:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }"
+    },
+    {
+      "name": "Homepage Focus List",
+      "kind": "custom",
+      "refersTo": "homepage-opening",
+      "description": "A quiet supporting list beside the author identity, without category behavior.",
+      "html": "<aside class=\"ds-focus\"><h2 class=\"ds-focus-title\">现在关注</h2><ul class=\"ds-focus-list\"><li>知识管理</li><li>AI 协作</li><li>CFD</li><li>AI for Science</li></ul></aside>",
+      "css": ".ds-focus { padding-top: 0.8rem; font-family: var(--font-sans); } .ds-focus-title { margin: 0; color: var(--accent-dark); font-size: 0.78rem; font-weight: 680; letter-spacing: 0.02em; } .ds-focus-list { margin: 1.15rem 0 0; padding: 0; list-style: none; color: #3e555b; font-size: 0.92rem; line-height: 2; }"
+    },
+    {
+      "name": "Latest Entry",
+      "kind": "custom",
+      "refersTo": "latest-entry",
+      "description": "The homepage bridge from author identity to the newest real article.",
+      "html": "<a class=\"ds-latest-entry\" href=\"/blog/why-i-keep-building-a-personal-knowledge-base/\"><time class=\"ds-entry-date\">2026.08.29</time><div class=\"ds-entry-copy\"><h3>我为什么一直在折腾个人知识库</h3><p>从纸质笔记到 Obsidian：我真正想保留的，是多年后还能找回、读懂并继续接上的东西。</p></div><span class=\"ds-entry-arrow\">↗</span></a>",
+      "css": ".ds-latest-entry { display: grid; grid-template-columns: 8rem minmax(0, 1fr) 2rem; gap: 1.5rem; padding-block: 1.9rem 2rem; border-bottom: 1px solid var(--line); color: var(--ink); font-family: var(--font-sans); text-decoration: none; } .ds-entry-date { padding-top: 0.35rem; color: var(--muted); font-size: 0.78rem; } .ds-entry-copy h3 { margin: 0; font-size: clamp(1.55rem, 3vw, 2rem); letter-spacing: -0.025em; transition: color 180ms ease-out; } .ds-entry-copy p { margin: 0.65rem 0 0; color: var(--muted); font-size: 0.92rem; } .ds-entry-arrow { color: var(--accent); font-size: 1.35rem; text-align: right; transition: transform 180ms ease-out; } .ds-latest-entry:hover .ds-entry-copy h3 { color: var(--accent-dark); } .ds-latest-entry:hover .ds-entry-arrow { transform: translate(0.2rem, -0.2rem); } .ds-latest-entry:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }"
+    },
+    {
+      "name": "Archive Ledger Entry",
+      "kind": "custom",
+      "refersTo": "archive-entry",
+      "description": "A chronological article row that stays continuous instead of becoming a card.",
+      "html": "<a class=\"ds-ledger-entry\" href=\"/blog/why-i-keep-building-a-personal-knowledge-base/\"><span class=\"ds-ledger-number\">001</span><time class=\"ds-ledger-date\">2026.08.29</time><div class=\"ds-ledger-copy\"><h2>我为什么一直在折腾个人知识库</h2><p>从纸质笔记到 Obsidian：我真正想保留的，是多年后还能找回、读懂并继续接上的东西。</p></div><span class=\"ds-ledger-arrow\">↗</span></a>",
+      "css": ".ds-ledger-entry { display: grid; grid-template-columns: 4.5rem 8.5rem minmax(0, 1fr) 2rem; gap: 1.5rem; padding-block: 2.15rem 2.3rem; border-bottom: 1px solid var(--line); color: var(--ink); font-family: var(--font-sans); text-decoration: none; } .ds-ledger-number, .ds-ledger-date { padding-top: 0.35rem; font-size: 0.78rem; } .ds-ledger-number { color: var(--accent); } .ds-ledger-date { color: var(--muted); } .ds-ledger-copy h2 { margin: 0; font-size: clamp(1.45rem, 3vw, 2rem); letter-spacing: -0.025em; transition: color 180ms ease-out; } .ds-ledger-copy p { margin: 0.65rem 0 0; color: var(--muted); font-size: 0.88rem; } .ds-ledger-arrow { color: var(--accent); font-size: 1.25rem; text-align: right; transition: transform 180ms ease-out; } .ds-ledger-entry:hover .ds-ledger-copy h2 { color: var(--accent-dark); } .ds-ledger-entry:hover .ds-ledger-arrow { transform: translate(0.2rem, -0.2rem); } .ds-ledger-entry:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }"
+    },
+    {
+      "name": "Article Header",
+      "kind": "custom",
+      "refersTo": "article-header",
+      "description": "A left-aligned path into the article with only essential publishing metadata.",
+      "html": "<header class=\"ds-article-header\"><a class=\"ds-article-back\" href=\"/blog/\">← blog</a><h1>我为什么一直在折腾个人知识库</h1><div class=\"ds-article-meta\"><time>2026年8月29日</time><span>·</span><span>约 8 分钟</span></div></header>",
+      "css": ".ds-article-header { width: min(43.5rem, calc(100% - 2 * clamp(1.25rem, 5vw, 4rem))); padding-block: clamp(4.5rem, 10vw, 7.5rem) clamp(2.5rem, 6vw, 4rem); color: var(--ink); font-family: var(--font-sans); } .ds-article-back { display: inline-flex; margin-bottom: clamp(2.5rem, 6vw, 4rem); color: var(--muted); font-size: 0.78rem; text-decoration: none; } .ds-article-back:hover { color: var(--accent); } .ds-article-back:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; } .ds-article-header h1 { margin: 0; font-size: clamp(2.35rem, 6vw, 4.25rem); font-weight: 730; letter-spacing: -0.04em; line-height: 1.16; } .ds-article-meta { display: flex; flex-wrap: wrap; gap: 0.35rem 0.55rem; margin-top: 1.75rem; color: var(--muted); font-size: 0.78rem; }"
+    },
+    {
+      "name": "Article Prose",
+      "kind": "custom",
+      "refersTo": "article-prose",
+      "description": "The stable Chinese long-form reading measure used by published posts.",
+      "html": "<article class=\"ds-prose\"><p><strong>个人知识库的意义，不在于装下所有信息，而在于让真正重要的东西多年后仍然找得回来。</strong></p><h2>工具会变，留下来的问题不会</h2><p>正文保持克制的宽度与行距，让技术术语、中文长句和个人叙述都能自然并置。</p></article>",
+      "css": ".ds-prose { width: min(43.5rem, calc(100% - 2 * clamp(1.25rem, 5vw, 4rem))); color: #253c44; font-family: var(--font-sans); font-size: 1.075rem; line-height: 1.92; letter-spacing: 0.005em; } .ds-prose p { margin: 0 0 1.55em; } .ds-prose h2 { margin: 3.2em 0 0.9em; color: var(--ink); font-size: 1.7rem; letter-spacing: -0.025em; line-height: 1.4; } .ds-prose a { color: var(--accent-dark); text-underline-offset: 0.18em; } .ds-prose a:hover { color: var(--accent); } .ds-prose a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "乙辛Zmod31 · blog",
+    "overview": "这不是一个需要额外命名的主题，而是乙辛Zmod31 的公开写作空间。界面让作者身份与真实文章先出现，装饰退到背景；整体保持冷静、清楚，但不做成刻板的学术门户。\n\n首页用分栏开场连接最近文章，目录以连续时间索引承接全部正式博文，文章页把注意力交还给中文长文。知识管理、AI 协作、CFD、AI for Science 与个人随笔拥有同等位置，不通过卡片或强制分类制造层级。",
+    "keyCharacteristics": [
+      "冷白纸面、墨蓝正文与少量蓝绿色强调。",
+      "无阴影、细分隔线、开放留白和左对齐阅读节奏。",
+      "作者 → 最近文章 → 时间目录 → 正文的直接路径。",
+      "桌面端保持宽松，移动端压缩布局而不压缩身份与内容。"
+    ],
+    "rules": [
+      { "name": "The Accent Rarity Rule", "body": "蓝绿色只用于方向、状态和链接；一屏内不以大面积色块争夺正文注意力。", "section": "colors" },
+      { "name": "The Reading Measure Rule", "body": "正文保持 43.5rem 的阅读宽度；技术图片可扩展至 56rem，但文字不随图片一起变宽。", "section": "typography" },
+      { "name": "The Flat-by-Default Rule", "body": "表面始终保持平整；除非未来出现真正需要遮挡关系的浮层，否则不引入投影。", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 让作者身份、真实文章标题和发布日期成为页面的主要证据。",
+      "Do 用细线和留白组织内容，并维持主页、目录和文章页一致的左边线。",
+      "Do 在移动端保留“乙辛Zmod31”单行展示，并检查页面没有横向溢出。",
+      "Do 让技术图片适度超出正文宽度，同时保持文字的阅读尺度。"
+    ],
+    "donts": [
+      "Don't 为博客创造额外的主题名、隐喻口号或虚构栏目。",
+      "Don't 用卡片网格、渐变、阴影和大面积强调色替代内容层级。",
+      "Don't 在没有真实内容需求前加入搜索、分页、标签或强制分类。",
+      "Don't 为视觉完整感伪造文章、统计数字、推荐语或交互入口。"
+    ]
+  }
+}

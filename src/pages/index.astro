@@ -4,11 +4,13 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { SITE_AUTHOR, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 
 const posts = (await getCollection('blog')).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+const latestPost = posts[0];
+const morePosts = posts.slice(1, 4);
 ---
 
 <!doctype html>
@@ -18,54 +20,261 @@ const posts = (await getCollection('blog')).sort(
 	</head>
 	<body>
 		<Header />
-		<main>
-			<section class="intro">
-				<h1>{SITE_TITLE}</h1>
-				<p>{SITE_DESCRIPTION}</p>
+		<main id="main-content" class="home-main">
+			<section class="home-opening" aria-labelledby="home-title">
+				<div class="home-identity">
+					<h1 id="home-title">{SITE_AUTHOR}</h1>
+					<p>{SITE_DESCRIPTION}</p>
+				</div>
+				<aside class="home-focus" aria-labelledby="focus-title">
+					<h2 id="focus-title">现在关注</h2>
+					<ul>
+						<li>知识管理</li>
+						<li>AI 协作</li>
+						<li>CFD</li>
+						<li>AI for Science</li>
+					</ul>
+				</aside>
 			</section>
 
-			<section>
-				<h2>最新文章</h2>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>{post.data.title}</a>
-								<p>{post.data.description}</p>
-								<FormattedDate date={post.data.pubDate} />
-							</li>
-						))
-					}
-				</ul>
+			<section class="home-latest" aria-labelledby="latest-title">
+				<div class="section-heading">
+					<h2 id="latest-title">最近更新</h2>
+					{posts.length > 1 && <a href="/blog/">全部文章 <span aria-hidden="true">→</span></a>}
+				</div>
+				{
+					latestPost ? (
+						<a class="latest-entry" href={`/blog/${latestPost.id}/`}>
+							<div class="entry-date">
+								<FormattedDate date={latestPost.data.pubDate} format="compact" />
+							</div>
+							<div class="entry-copy">
+								<h3>{latestPost.data.title}</h3>
+								<p>{latestPost.data.description}</p>
+							</div>
+							<span class="entry-arrow" aria-hidden="true">↗</span>
+						</a>
+					) : (
+						<p class="empty-state">还没有公开文章。</p>
+					)
+				}
 			</section>
+
+			{
+				morePosts.length > 0 && (
+					<section class="home-more" aria-labelledby="more-title">
+						<h2 id="more-title">继续阅读</h2>
+						<ul>
+							{morePosts.map((post) => (
+								<li>
+									<a href={`/blog/${post.id}/`}>
+										<FormattedDate date={post.data.pubDate} format="compact" />
+										<span>{post.data.title}</span>
+									</a>
+								</li>
+							))}
+						</ul>
+					</section>
+				)
+			}
 		</main>
 		<Footer />
 	</body>
 </html>
 
 <style>
-	.intro {
-		margin-bottom: 4rem;
+	.home-main {
+		width: min(var(--site-width), calc(100% - 2 * var(--page-gutter)));
+		margin-inline: auto;
 	}
-	ul {
+	.home-opening {
+		display: grid;
+		grid-template-columns: minmax(0, 1.7fr) minmax(10rem, 0.7fr);
+		gap: clamp(3rem, 9vw, 8rem);
+		align-items: start;
+		padding-block: clamp(5.5rem, 12vw, 9rem) clamp(4.5rem, 9vw, 7rem);
+	}
+	.home-identity h1 {
 		margin: 0;
+		font-size: clamp(3.7rem, 7.2vw, 5.5rem);
+		font-weight: 740;
+		letter-spacing: -0.04em;
+		line-height: 0.98;
+	}
+	.home-identity p {
+		margin: 2rem 0 0;
+		font-size: clamp(1.08rem, 2vw, 1.3rem);
+		line-height: 1.6;
+	}
+	.home-focus {
+		padding-top: 0.8rem;
+	}
+	.home-focus h2,
+	.section-heading h2,
+	.home-more h2 {
+		margin: 0;
+		color: var(--accent-dark);
+		font-size: 0.78rem;
+		font-weight: 680;
+		letter-spacing: 0.02em;
+	}
+	.home-focus ul {
+		margin: 1.15rem 0 0;
 		padding: 0;
 		list-style: none;
+		color: #3e555b;
+		font-size: 0.92rem;
+		line-height: 2;
 	}
-	li {
-		padding: 1.5rem 0;
-		border-top: 1px solid rgb(var(--gray-light));
+	.home-latest {
+		position: relative;
+		padding-top: 2rem;
 	}
-	li a {
-		font-size: 1.35em;
-		font-weight: 700;
+	.home-latest::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		right: 0;
+		left: 0;
+		height: 1px;
+		background: var(--line);
+		transform-origin: left;
+	}
+	.section-heading {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+	.section-heading a {
+		color: var(--muted);
+		font-size: 0.78rem;
 		text-decoration: none;
 	}
-	li p {
-		margin: 0.35rem 0;
+	.section-heading a:hover { color: var(--accent); }
+	.latest-entry {
+		display: grid;
+		grid-template-columns: 8rem minmax(0, 1fr) 2rem;
+		gap: 1.5rem;
+		align-items: start;
+		padding-block: 1.9rem 2rem;
+		border-bottom: 1px solid var(--line);
+		color: var(--ink);
+		text-decoration: none;
 	}
-	time {
-		color: rgb(var(--gray));
-		font-size: 0.9em;
+	.entry-date {
+		padding-top: 0.35rem;
+		color: var(--muted);
+		font-size: 0.78rem;
+	}
+	.entry-copy h3 {
+		margin: 0;
+		font-size: clamp(1.55rem, 3vw, 2rem);
+		letter-spacing: -0.025em;
+		word-break: auto-phrase;
+		transition: color 180ms ease-out;
+	}
+	.entry-copy p {
+		margin: 0.65rem 0 0;
+		color: var(--muted);
+		font-size: 0.92rem;
+	}
+	.entry-arrow {
+		padding-top: 0.2rem;
+		color: var(--accent);
+		font-size: 1.35rem;
+		text-align: right;
+		transition: transform 180ms ease-out;
+	}
+	.latest-entry:hover .entry-copy h3 { color: var(--accent-dark); }
+	.latest-entry:hover .entry-arrow { transform: translate(0.2rem, -0.2rem); }
+	.empty-state {
+		margin: 1.75rem 0 0;
+		padding-bottom: 2rem;
+		border-bottom: 1px solid var(--line);
+		color: var(--muted);
+	}
+	.home-more {
+		margin-top: 4rem;
+	}
+	.home-more ul {
+		margin: 1.25rem 0 0;
+		padding: 0;
+		list-style: none;
+		border-top: 1px solid var(--line);
+	}
+	.home-more li { border-bottom: 1px solid var(--line); }
+	.home-more a {
+		display: grid;
+		grid-template-columns: 8rem 1fr;
+		gap: 1.5rem;
+		padding-block: 1rem;
+		color: var(--ink);
+		font-size: 0.95rem;
+		text-decoration: none;
+	}
+	.home-more time { color: var(--muted); font-size: 0.78rem; }
+	.home-more a:hover span { color: var(--accent); }
+
+	@media (prefers-reduced-motion: no-preference) {
+		.home-opening {
+			animation: opening-settle 640ms cubic-bezier(0.16, 1, 0.3, 1) both;
+		}
+		.home-latest::before {
+			animation: line-draw 760ms 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
+		}
+	}
+	@keyframes opening-settle {
+		from { opacity: 0.7; transform: translateY(0.4rem); }
+		to { opacity: 1; transform: translateY(0); }
+	}
+	@keyframes line-draw {
+		from { transform: scaleX(0); }
+		to { transform: scaleX(1); }
+	}
+
+	@media (max-width: 44rem) {
+		.home-opening {
+			display: block;
+			padding-block: 4.75rem 3.5rem;
+		}
+		.home-identity h1 {
+			font-size: clamp(2.45rem, 12vw, 3.35rem);
+			white-space: nowrap;
+		}
+		.home-identity p {
+			margin-top: 1.4rem;
+			font-size: 1.05rem;
+		}
+		.home-focus {
+			margin-top: 2.8rem;
+			padding-top: 1.25rem;
+			border-top: 1px solid var(--line);
+		}
+		.home-focus ul {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.25rem 1rem;
+			font-size: 0.82rem;
+			line-height: 1.8;
+		}
+		.latest-entry {
+			display: block;
+			padding-block: 1.55rem 1.75rem;
+		}
+		.entry-date { padding: 0; }
+		.entry-copy h3 {
+			margin-top: 0.8rem;
+			font-size: 1.45rem;
+		}
+		.entry-copy p {
+			font-size: 0.85rem;
+			line-height: 1.7;
+		}
+		.entry-arrow { display: none; }
+		.home-more a {
+			grid-template-columns: 1fr;
+			gap: 0.35rem;
+		}
 	}
 </style>

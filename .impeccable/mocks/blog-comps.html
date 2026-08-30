@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>乙辛Zmod31 · blog — composition studies</title>
+    <style>
+      :root {
+        --canvas: #e9eeed;
+        --paper: #f8faf9;
+        --paper-strong: #ffffff;
+        --ink: #152c35;
+        --muted: #64777c;
+        --line: #cfd9d8;
+        --accent: #137d78;
+        --accent-soft: #dceeed;
+        --shadow: 0 22px 60px rgba(19, 47, 55, 0.14);
+        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        color: var(--ink);
+        background: var(--canvas);
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
+      body { background: var(--canvas); }
+
+      .board {
+        width: 1600px;
+        height: 1000px;
+        padding: 40px 52px 48px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 92% 8%, rgba(19, 125, 120, 0.08), transparent 30%),
+          var(--canvas);
+      }
+
+      .board-head {
+        height: 64px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+      }
+
+      .board-title { font-size: 24px; font-weight: 650; letter-spacing: -0.02em; }
+      .board-note { margin-top: 5px; color: #6a7d80; font-size: 13px; }
+      .board-index {
+        border: 1px solid rgba(21, 44, 53, 0.24);
+        border-radius: 999px;
+        padding: 8px 13px;
+        color: #53696e;
+        font-size: 12px;
+      }
+
+      .pair {
+        height: 824px;
+        display: grid;
+        grid-template-columns: 1120px 320px;
+        gap: 36px;
+        align-items: start;
+      }
+
+      .frame {
+        position: relative;
+        overflow: hidden;
+        background: var(--paper);
+        box-shadow: var(--shadow);
+      }
+
+      .desktop { width: 1120px; height: 824px; border-radius: 4px; }
+      .mobile { width: 320px; height: 700px; margin-top: 124px; border-radius: 22px; }
+
+      .mobile::before {
+        content: "";
+        position: absolute;
+        z-index: 20;
+        top: 10px;
+        left: 50%;
+        width: 62px;
+        height: 4px;
+        border-radius: 99px;
+        background: rgba(21, 44, 53, 0.22);
+        transform: translateX(-50%);
+      }
+
+      a { color: inherit; text-decoration: none; }
+      .arrow { color: var(--accent); }
+      .rule { height: 1px; background: var(--line); }
+      .meta { color: var(--muted); font-size: 12px; letter-spacing: 0.01em; }
+      .kicker { color: var(--accent); font-size: 12px; font-weight: 650; }
+
+      /* Composition A — asymmetric split */
+      .a-desktop { padding: 34px 64px 54px; }
+      .a-desktop .nav, .a-mobile .nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .a-desktop .brand { font-size: 16px; font-weight: 700; }
+      .a-desktop .nav-links { display: flex; gap: 26px; color: var(--muted); font-size: 13px; }
+      .a-desktop .nav-links .active { color: var(--ink); }
+      .a-desktop .opening {
+        display: grid;
+        grid-template-columns: 1.7fr 0.75fr;
+        gap: 82px;
+        padding: 110px 0 76px;
+      }
+      .a-desktop h1 { margin: 0; font-size: 64px; line-height: 0.98; letter-spacing: -0.04em; }
+      .a-desktop .thesis { margin: 26px 0 0; font-size: 20px; line-height: 1.6; }
+      .a-desktop .focus { padding-top: 14px; }
+      .a-desktop .focus p { margin: 15px 0 0; color: #40565c; font-size: 14px; line-height: 1.9; }
+      .a-desktop .latest { padding-top: 28px; }
+      .a-desktop .post-row {
+        display: grid;
+        grid-template-columns: 130px 1fr 44px;
+        gap: 24px;
+        align-items: start;
+        padding: 24px 0 26px;
+        border-bottom: 1px solid var(--line);
+      }
+      .a-desktop .post-row h2 { margin: 0 0 10px; font-size: 26px; line-height: 1.25; letter-spacing: -0.02em; }
+      .a-desktop .post-row p { margin: 0; color: var(--muted); font-size: 14px; }
+      .a-desktop .post-row .go { padding-top: 6px; color: var(--accent); font-size: 24px; text-align: right; }
+      .a-desktop .foot { display: flex; justify-content: space-between; padding-top: 22px; color: var(--muted); font-size: 12px; }
+
+      .a-mobile { padding: 30px 22px 30px; }
+      .a-mobile .brand { font-size: 14px; font-weight: 700; }
+      .a-mobile .nav-links { display: flex; gap: 14px; color: var(--muted); font-size: 11px; }
+      .a-mobile .opening { padding: 76px 0 50px; }
+      .a-mobile h1 { margin: 0; font-size: 40px; line-height: 1.02; letter-spacing: -0.04em; }
+      .a-mobile .thesis { margin: 20px 0 0; font-size: 16px; line-height: 1.65; }
+      .a-mobile .focus { margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--line); }
+      .a-mobile .focus p { margin: 10px 0 0; color: #40565c; font-size: 12px; line-height: 1.8; }
+      .a-mobile .latest { padding-top: 22px; border-top: 1px solid var(--line); }
+      .a-mobile .post-row { padding-top: 18px; }
+      .a-mobile .post-row h2 { margin: 10px 0 12px; font-size: 21px; line-height: 1.35; letter-spacing: -0.02em; }
+      .a-mobile .post-row p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.7; }
+
+      /* Composition B — signature rail */
+      .b-desktop { display: grid; grid-template-columns: 184px 1fr; background: var(--paper-strong); }
+      .b-desktop .rail {
+        padding: 34px 28px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        color: #eef8f7;
+        background: var(--ink);
+      }
+      .b-desktop .rail-brand { font-size: 17px; font-weight: 700; line-height: 1.25; }
+      .b-desktop .rail-nav { display: grid; gap: 14px; font-size: 12px; color: #adc4c6; }
+      .b-desktop .rail-nav .active { color: #ffffff; }
+      .b-desktop .rail-foot { color: #91aaad; font-size: 11px; line-height: 1.6; }
+      .b-desktop .main { padding: 34px 66px 52px 70px; }
+      .b-desktop .topline { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+      .b-desktop .opening { padding: 82px 0 60px; }
+      .b-desktop .opening h1 { margin: 0; max-width: 680px; font-size: 32px; line-height: 1.35; font-weight: 560; letter-spacing: -0.025em; }
+      .b-desktop .focus-line { margin-top: 26px; color: var(--muted); font-size: 13px; }
+      .b-desktop .feature {
+        position: relative;
+        padding: 34px 0 38px;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+      }
+      .b-desktop .feature-grid { display: grid; grid-template-columns: 80px 1fr 120px; gap: 24px; }
+      .b-desktop .feature .number { color: var(--accent); font-size: 54px; line-height: 1; letter-spacing: -0.05em; }
+      .b-desktop .feature h2 { margin: 0 0 12px; max-width: 590px; font-size: 34px; line-height: 1.22; letter-spacing: -0.03em; }
+      .b-desktop .feature p { margin: 0; color: var(--muted); font-size: 14px; }
+      .b-desktop .date { color: var(--muted); font-size: 12px; text-align: right; }
+      .b-desktop .archive-link { display: flex; justify-content: flex-end; padding-top: 26px; font-size: 13px; }
+
+      .b-mobile { display: grid; grid-template-columns: 48px 1fr; background: var(--paper-strong); }
+      .b-mobile .rail { padding: 30px 0 22px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; background: var(--ink); color: white; }
+      .b-mobile .rail-brand { writing-mode: vertical-rl; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; }
+      .b-mobile .rail-nav { display: grid; gap: 18px; font-size: 10px; color: #adc4c6; }
+      .b-mobile .main { padding: 30px 18px 28px; }
+      .b-mobile .topline { color: var(--muted); font-size: 10px; text-align: right; }
+      .b-mobile .opening { padding: 66px 0 48px; }
+      .b-mobile .opening h1 { margin: 0; font-size: 24px; line-height: 1.45; font-weight: 560; letter-spacing: -0.02em; }
+      .b-mobile .focus-line { margin-top: 20px; color: var(--muted); font-size: 11px; line-height: 1.7; }
+      .b-mobile .feature { padding: 22px 0 26px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+      .b-mobile .number { color: var(--accent); font-size: 28px; line-height: 1; }
+      .b-mobile .feature h2 { margin: 20px 0 12px; font-size: 21px; line-height: 1.35; letter-spacing: -0.02em; }
+      .b-mobile .feature p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+      .b-mobile .date { margin-top: 20px; color: var(--muted); font-size: 10px; }
+
+      /* Composition C — continuous ledger */
+      .c-desktop { padding: 0 54px 46px; background: var(--paper); }
+      .c-desktop .masthead {
+        display: grid;
+        grid-template-columns: 220px 1fr 220px;
+        align-items: center;
+        height: 96px;
+        border-bottom: 1px solid var(--line);
+      }
+      .c-desktop .brand { font-size: 17px; font-weight: 700; }
+      .c-desktop .page-name { text-align: center; font-size: 13px; }
+      .c-desktop .mast-nav { display: flex; justify-content: flex-end; gap: 22px; color: var(--muted); font-size: 12px; }
+      .c-desktop .intro {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        padding: 60px 0 54px;
+      }
+      .c-desktop .intro-label { color: var(--accent); font-size: 12px; }
+      .c-desktop .intro-copy { max-width: 660px; font-size: 29px; line-height: 1.45; letter-spacing: -0.025em; }
+      .c-desktop .intro-copy p { margin: 0; }
+      .c-desktop .intro-copy small { display: block; margin-top: 20px; color: var(--muted); font-size: 13px; letter-spacing: 0; }
+      .c-desktop .ledger { border-top: 1px solid var(--ink); }
+      .c-desktop .ledger-head, .c-desktop .entry {
+        display: grid;
+        grid-template-columns: 76px 144px 1fr 54px;
+        gap: 20px;
+      }
+      .c-desktop .ledger-head { padding: 12px 0; color: var(--muted); font-size: 10px; border-bottom: 1px solid var(--line); }
+      .c-desktop .entry { padding: 28px 0 32px; align-items: start; border-bottom: 1px solid var(--line); }
+      .c-desktop .entry .id { color: var(--accent); font-size: 13px; }
+      .c-desktop .entry .date { text-align: left; }
+      .c-desktop .entry h2 { margin: 0 0 11px; font-size: 29px; line-height: 1.28; letter-spacing: -0.025em; }
+      .c-desktop .entry p { margin: 0; color: var(--muted); font-size: 13px; }
+      .c-desktop .entry .go { color: var(--accent); font-size: 20px; text-align: right; }
+      .c-desktop .footer { display: flex; justify-content: space-between; padding-top: 26px; color: var(--muted); font-size: 11px; }
+
+      .c-mobile { padding: 0 20px 28px; background: var(--paper); }
+      .c-mobile .masthead { display: flex; justify-content: space-between; align-items: center; height: 72px; border-bottom: 1px solid var(--line); }
+      .c-mobile .brand { font-size: 13px; font-weight: 700; }
+      .c-mobile .mast-nav { display: flex; gap: 13px; color: var(--muted); font-size: 10px; }
+      .c-mobile .intro { padding: 56px 0 46px; }
+      .c-mobile .intro-label { color: var(--accent); font-size: 10px; }
+      .c-mobile .intro-copy { margin-top: 18px; font-size: 22px; line-height: 1.5; letter-spacing: -0.02em; }
+      .c-mobile .intro-copy small { display: block; margin-top: 18px; color: var(--muted); font-size: 11px; line-height: 1.7; letter-spacing: 0; }
+      .c-mobile .ledger { border-top: 1px solid var(--ink); }
+      .c-mobile .ledger-head { padding: 10px 0; color: var(--muted); font-size: 9px; border-bottom: 1px solid var(--line); }
+      .c-mobile .entry { padding: 20px 0 24px; border-bottom: 1px solid var(--line); }
+      .c-mobile .entry-top { display: flex; justify-content: space-between; color: var(--muted); font-size: 9px; }
+      .c-mobile .entry .id { color: var(--accent); }
+      .c-mobile .entry h2 { margin: 16px 0 11px; font-size: 21px; line-height: 1.38; letter-spacing: -0.02em; }
+      .c-mobile .entry p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+
+      [data-comp] { display: none; }
+      body.show-a [data-comp="a"], body.show-b [data-comp="b"], body.show-c [data-comp="c"] { display: block; }
+    </style>
+  </head>
+  <body class="show-a">
+    <section class="board" data-comp="a">
+      <header class="board-head">
+        <div><div class="board-title">A · 分栏开场</div><div class="board-note">身份和当前关注并列，最新文章在首屏下半部自然接住阅读。</div></div>
+        <div class="board-index">乙辛Zmod31 · blog</div>
+      </header>
+      <div class="pair">
+        <div class="frame desktop a-desktop">
+          <nav class="nav"><div class="brand">乙辛Zmod31</div><div class="nav-links"><span class="active">blog</span><span>RSS</span></div></nav>
+          <section class="opening">
+            <div><h1>乙辛Zmod31</h1><p class="thesis">记录研究、工具与生活。</p></div>
+            <aside class="focus"><div class="kicker">现在关注</div><p>知识管理<br />AI 协作<br />CFD<br />AI for Science</p></aside>
+          </section>
+          <div class="rule"></div>
+          <section class="latest">
+            <div class="kicker">最近更新</div>
+            <article class="post-row"><div class="meta">2026.08.14</div><div><h2>我为什么一直在折腾个人知识库？</h2><p>从纸质笔记到 Obsidian，我真正想留下什么。</p></div><div class="go">↗</div></article>
+          </section>
+          <footer class="foot"><span>只发布正式博文</span><span>GitHub · RSS</span></footer>
+        </div>
+        <div class="frame mobile a-mobile">
+          <nav class="nav"><div class="brand">乙辛Zmod31</div><div class="nav-links"><span>blog</span><span>RSS</span></div></nav>
+          <section class="opening"><h1>乙辛<br />Zmod31</h1><p class="thesis">记录研究、工具与生活。</p><aside class="focus"><div class="kicker">现在关注</div><p>知识管理 · AI 协作<br />CFD · AI for Science</p></aside></section>
+          <section class="latest"><div class="kicker">最近更新</div><article class="post-row"><div class="meta">2026.08.14</div><h2>我为什么一直在折腾个人知识库？</h2><p>从纸质笔记到 Obsidian，我真正想留下什么。</p></article></section>
+        </div>
+      </div>
+    </section>
+
+    <section class="board" data-comp="b">
+      <header class="board-head">
+        <div><div class="board-title">B · 身份侧栏</div><div class="board-note">固定墨蓝侧栏建立辨识度，正文区域专注于最新文章。</div></div>
+        <div class="board-index">乙辛Zmod31 · blog</div>
+      </header>
+      <div class="pair">
+        <div class="frame desktop b-desktop">
+          <aside class="rail"><div class="rail-brand">乙辛<br />Zmod31</div><nav class="rail-nav"><span class="active">blog</span><span>RSS</span></nav><div class="rail-foot">research<br />tools<br />life</div></aside>
+          <main class="main"><div class="topline"><span>个人博客</span><span>2026 —</span></div><section class="opening"><h1>记录研究、工具与生活。</h1><p class="focus-line">知识管理 · AI 协作 · CFD · AI for Science</p></section><article class="feature"><div class="feature-grid"><div class="number">01</div><div><div class="kicker">最近更新</div><h2>我为什么一直在折腾个人知识库？</h2><p>从纸质笔记到 Obsidian，我真正想留下什么。</p></div><div class="date">2026.08.14</div></div></article><div class="archive-link">全部文章&nbsp; <span class="arrow">→</span></div></main>
+        </div>
+        <div class="frame mobile b-mobile">
+          <aside class="rail"><div class="rail-brand">乙辛Zmod31</div><nav class="rail-nav"><span>blog</span><span>RSS</span></nav></aside>
+          <main class="main"><div class="topline">2026 —</div><section class="opening"><h1>记录研究、工具与生活。</h1><p class="focus-line">知识管理 · AI 协作<br />CFD · AI for Science</p></section><article class="feature"><div class="number">01</div><h2>我为什么一直在折腾个人知识库？</h2><p>从纸质笔记到 Obsidian，我真正想留下什么。</p><div class="date">2026.08.14&nbsp; ↗</div></article></main>
+        </div>
+      </div>
+    </section>
+
+    <section class="board" data-comp="c">
+      <header class="board-head">
+        <div><div class="board-title">C · 连续目录</div><div class="board-note">主页本身就是写作目录，信息密度最高，也最容易随文章增长。</div></div>
+        <div class="board-index">乙辛Zmod31 · blog</div>
+      </header>
+      <div class="pair">
+        <div class="frame desktop c-desktop">
+          <header class="masthead"><div class="brand">乙辛Zmod31</div><div class="page-name">blog</div><nav class="mast-nav"><span>文章</span><span>RSS</span></nav></header>
+          <section class="intro"><div class="intro-label">ABOUT</div><div class="intro-copy"><p>记录研究、工具与生活。</p><small>知识管理 · AI 协作 · CFD · AI for Science</small></div></section>
+          <section class="ledger"><div class="ledger-head"><span>编号</span><span>日期</span><span>文章</span><span></span></div><article class="entry"><div class="id">001</div><div class="date">2026.08.14</div><div><h2>我为什么一直在折腾个人知识库？</h2><p>从纸质笔记到 Obsidian，我真正想留下什么。</p></div><div class="go">↗</div></article></section>
+          <footer class="footer"><span>乙辛Zmod31 · blog</span><span>GitHub · RSS</span></footer>
+        </div>
+        <div class="frame mobile c-mobile">
+          <header class="masthead"><div class="brand">乙辛Zmod31</div><nav class="mast-nav"><span>blog</span><span>RSS</span></nav></header>
+          <section class="intro"><div class="intro-label">ABOUT</div><div class="intro-copy">记录研究、工具与生活。<small>知识管理 · AI 协作 · CFD · AI for Science</small></div></section>
+          <section class="ledger"><div class="ledger-head">文章</div><article class="entry"><div class="entry-top"><span class="id">001</span><span>2026.08.14</span></div><h2>我为什么一直在折腾个人知识库？</h2><p>从纸质笔记到 Obsidian，我真正想留下什么。</p></article></section>
+        </div>
+      </div>
+    </section>
+    <script>
+      const comp = new URLSearchParams(location.search).get('comp') || 'a';
+      document.body.className = `show-${['a', 'b', 'c'].includes(comp) ? comp : 'a'}`;
+    </script>
+  </body>
+</html>

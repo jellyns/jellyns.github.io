@@ -1,17 +1,22 @@
 ---
 interface Props {
 	date: Date;
+	format?: 'long' | 'compact';
 }
 
-const { date } = Astro.props;
+const { date, format = 'long' } = Astro.props;
+const displayDate =
+	format === 'compact'
+		? [date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate()]
+				.map((part, index) => (index === 0 ? String(part) : String(part).padStart(2, '0')))
+				.join('.')
+		: date.toLocaleDateString('zh-CN', {
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric',
+			});
 ---
 
 <time datetime={date.toISOString()}>
-	{
-		date.toLocaleDateString('zh-CN', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric',
-		})
-	}
+	{displayDate}
 </time>

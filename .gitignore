@@ -25,3 +25,9 @@ pnpm-debug.log*
 
 # unused images from the Astro starter template
 src/assets/blog-placeholder-*.jpg
+
+# temporary Impeccable review artifacts
+.impeccable/questions/
+.impeccable/screenshots/
+.impeccable/mocks/blog-surface-brief.md
+.impeccable/mocks/viewport-probe.html
