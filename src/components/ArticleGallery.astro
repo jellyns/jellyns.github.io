@@ -1,0 +1,276 @@
+---
+interface Props {
+	images: { src: string; title: string; alt: string }[];
+}
+const { images } = Astro.props;
+---
+
+<!--
+THESIS: 图片版先供逐页阅读，全文紧接其后，读者可随时选择阅读方式。
+OWN-WORLD: 图片保留原稿；控件沿用冷白底、墨蓝文字、蓝绿色链接和细线。
+STORY: 看封面、滑动翻页、按需放大，然后进入可复制和检索的全文。
+FIRST VIEWPORT: 标题与日期后居中呈现一张完整竖图，页码和翻页控件在图外。
+FORM: 用户确认的小红书式顶部图册与下方全文，扩展现有文章页。
+-->
+<section class="ds-gallery" id="image-version" aria-label="图片版" tabindex="-1" data-gallery>
+	<div class="ds-gallery-heading">
+		<span>图片版 <span class="ds-gallery-hint">· 点击图片放大</span></span>
+		<div class="ds-gallery-heading-actions">
+			<span class="ds-gallery-count" aria-live="polite" data-count>1 / {images.length}</span>
+			<a href="#full-text">阅读全文 <span aria-hidden="true">↓</span></a>
+		</div>
+	</div>
+	<div class="ds-gallery-track" tabindex="0" aria-label="图片版，可左右滑动或使用方向键翻页" data-track>
+		{images.map((image, index) => (
+			<a class="ds-gallery-slide" href={image.src} target="_blank" rel="noopener" data-slide data-title={image.title} aria-label={`放大第 ${index + 1} 张：${image.title}`}>
+				<img src={image.src} alt={image.alt} width="1080" height="1440" loading={index === 0 ? 'eager' : 'lazy'} decoding="async" draggable="false" />
+			</a>
+		))}
+	</div>
+	<div class="ds-gallery-paging" data-controls hidden>
+		<button type="button" data-previous aria-label="上一张图片" disabled>←</button>
+		<span class="ds-gallery-caption" data-caption>{images[0].title}</span>
+		<button type="button" data-next aria-label="下一张图片">→</button>
+	</div>
+	<a class="ds-gallery-read" href="#full-text">阅读全文 <span aria-hidden="true">↓</span></a>
+	<dialog class="ds-gallery-viewer" aria-label="放大阅读图片" data-viewer>
+		<div class="ds-viewer-toolbar">
+			<span data-viewer-count>1 / {images.length}</span>
+			<div class="ds-viewer-actions">
+				<button type="button" data-zoom aria-pressed="false">放大</button>
+				<a href={images[0].src} target="_blank" rel="noopener" data-original>查看原图</a>
+				<button type="button" data-close autofocus>关闭</button>
+			</div>
+		</div>
+		<div class="ds-viewer-stage" tabindex="0" aria-label="图片，可在放大后滚动查看" data-viewer-stage>
+			<img src={images[0].src} alt={images[0].alt} width="1080" height="1440" data-viewer-image />
+		</div>
+		<div class="ds-viewer-footer">
+			<button type="button" data-viewer-previous aria-label="放大阅读：上一张" disabled>←</button>
+			<span data-viewer-caption>{images[0].title}</span>
+			<button type="button" data-viewer-next aria-label="放大阅读：下一张">→</button>
+		</div>
+	</dialog>
+</section>
+
+<script>
+	for (const gallery of document.querySelectorAll<HTMLElement>('[data-gallery]')) {
+		const track = gallery.querySelector<HTMLElement>('[data-track]')!;
+		const slides = [...gallery.querySelectorAll<HTMLAnchorElement>('[data-slide]')];
+		const previous = gallery.querySelector<HTMLButtonElement>('[data-previous]')!;
+		const next = gallery.querySelector<HTMLButtonElement>('[data-next]')!;
+		const viewer = gallery.querySelector<HTMLDialogElement>('[data-viewer]')!;
+		const viewerImage = gallery.querySelector<HTMLImageElement>('[data-viewer-image]')!;
+		const viewerStage = gallery.querySelector<HTMLElement>('[data-viewer-stage]')!;
+		const viewerPrevious = gallery.querySelector<HTMLButtonElement>('[data-viewer-previous]')!;
+		const viewerNext = gallery.querySelector<HTMLButtonElement>('[data-viewer-next]')!;
+		const zoom = gallery.querySelector<HTMLButtonElement>('[data-zoom]')!;
+		let current = 0;
+		let frame = 0;
+
+		function update() {
+			const count = `${current + 1} / ${slides.length}`;
+			gallery.querySelector('[data-count]')!.textContent = count;
+			gallery.querySelector('[data-caption]')!.textContent = slides[current].dataset.title!;
+			previous.disabled = current === 0;
+			next.disabled = current === slides.length - 1;
+			for (const [index, slide] of slides.entries()) slide.tabIndex = index === current ? 0 : -1;
+		}
+
+		function resetZoom() {
+			viewer.classList.remove('ds-is-zoomed');
+			zoom.setAttribute('aria-pressed', 'false');
+			zoom.textContent = '放大';
+			viewerStage.scrollTo(0, 0);
+		}
+
+		function updateViewer() {
+			resetZoom();
+			viewerImage.src = slides[current].href;
+			viewerImage.alt = slides[current].querySelector('img')!.alt;
+			gallery.querySelector<HTMLAnchorElement>('[data-original]')!.href = slides[current].href;
+			gallery.querySelector('[data-viewer-count]')!.textContent = `${current + 1} / ${slides.length}`;
+			gallery.querySelector('[data-viewer-caption]')!.textContent = slides[current].dataset.title!;
+			viewerPrevious.disabled = current === 0;
+			viewerNext.disabled = current === slides.length - 1;
+		}
+
+		function select(index: number, smooth = true) {
+			current = Math.max(0, Math.min(slides.length - 1, index));
+			track.scrollTo({ left: current * track.clientWidth, behavior: smooth && !matchMedia('(prefers-reduced-motion: reduce)').matches ? 'smooth' : 'instant' });
+			update();
+			if (viewer.open) updateViewer();
+		}
+
+		track.addEventListener('scroll', () => {
+			cancelAnimationFrame(frame);
+			frame = requestAnimationFrame(() => {
+				current = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / track.clientWidth)));
+				update();
+			});
+		}, { passive: true });
+		track.addEventListener('keydown', (event) => {
+			if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+			event.preventDefault();
+			select(current + (event.key === 'ArrowRight' ? 1 : -1));
+		});
+		previous.addEventListener('click', () => select(current - 1));
+		next.addEventListener('click', () => select(current + 1));
+		new ResizeObserver(() => select(current, false)).observe(track);
+
+		for (const [index, slide] of slides.entries()) {
+			slide.addEventListener('click', (event) => {
+				if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+				event.preventDefault();
+				current = index;
+				updateViewer();
+				viewer.showModal();
+				document.documentElement.classList.add('ds-image-viewer-open');
+			});
+		}
+		viewerPrevious.addEventListener('click', () => select(current - 1, false));
+		viewerNext.addEventListener('click', () => select(current + 1, false));
+		gallery.querySelector('[data-close]')!.addEventListener('click', () => viewer.close());
+		viewer.addEventListener('close', () => {
+			document.documentElement.classList.remove('ds-image-viewer-open');
+			resetZoom();
+		});
+		viewer.addEventListener('click', (event) => {
+			if (event.target !== viewer) return;
+			const rect = viewer.getBoundingClientRect();
+			if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) viewer.close();
+		});
+		viewer.addEventListener('keydown', (event) => {
+			if (viewer.classList.contains('ds-is-zoomed')) return;
+			if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+			event.preventDefault();
+			select(current + (event.key === 'ArrowRight' ? 1 : -1), false);
+		});
+		zoom.addEventListener('click', () => {
+			const enlarged = viewer.classList.toggle('ds-is-zoomed');
+			zoom.setAttribute('aria-pressed', String(enlarged));
+			zoom.textContent = enlarged ? '适应屏幕' : '放大';
+			viewerStage.scrollTo(0, 0);
+		});
+		gallery.querySelector<HTMLElement>('[data-controls]')!.hidden = false;
+		update();
+	}
+</script>
+
+<style>
+	.ds-gallery {
+		width: min(var(--reading-width), calc(100% - 2 * var(--page-gutter)));
+		margin: 0 auto 3rem;
+		scroll-margin-top: 1.5rem;
+	}
+	.ds-gallery-heading {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		padding-bottom: 0.75rem;
+		color: var(--muted);
+		font-size: 0.78rem;
+	}
+	.ds-gallery-count { font-variant-numeric: tabular-nums; }
+	.ds-gallery-heading-actions { display: flex; gap: 1rem; align-items: center; }
+	.ds-gallery-heading-actions a { text-decoration: none; }
+	.ds-gallery-track {
+		display: grid;
+		grid-auto-flow: column;
+		grid-auto-columns: 100%;
+		width: min(100%, 34rem, max(15rem, calc((100svh - 27rem) * 0.75)));
+		margin-inline: auto;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		overscroll-behavior-x: contain;
+		scrollbar-width: none;
+	}
+	.ds-gallery-track::-webkit-scrollbar { display: none; }
+	.ds-gallery-slide {
+		display: block;
+		min-width: 0;
+		scroll-snap-align: start;
+		scroll-snap-stop: always;
+		cursor: zoom-in;
+	}
+	.ds-gallery-slide:focus-visible { outline-offset: -4px; }
+	.ds-gallery-slide img { width: 100%; height: auto; aspect-ratio: 3 / 4; }
+	.ds-gallery-paging {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		margin-top: 0.75rem;
+	}
+	.ds-gallery-paging[hidden] { display: none; }
+	.ds-gallery-caption {
+		max-width: 24rem;
+		flex: 1;
+		text-align: center;
+		color: var(--muted);
+		font-size: 0.78rem;
+	}
+	button {
+		min-width: 2.75rem;
+		min-height: 2.75rem;
+		padding: 0.5rem 0.75rem;
+		border: 0;
+		background: transparent;
+		color: var(--accent-dark);
+		cursor: pointer;
+	}
+	button:hover:not(:disabled) { background: var(--accent-soft); }
+	button:disabled { color: var(--muted); opacity: 0.4; cursor: default; }
+	.ds-gallery-paging button, .ds-viewer-footer button { font-size: 1.25rem; }
+	.ds-gallery-read {
+		display: flex;
+		justify-content: center;
+		gap: 0.5rem;
+		padding-block: 0.75rem;
+		margin-top: 0.75rem;
+		border-top: 1px solid var(--line);
+		font-size: 0.85rem;
+		text-decoration: none;
+	}
+	.ds-gallery-viewer {
+		box-sizing: border-box;
+		width: calc(100vw - 2rem);
+		max-width: 80rem;
+		height: calc(100dvh - 2rem);
+		max-height: none;
+		padding: 0;
+		border: 1px solid var(--line);
+		background: var(--paper);
+		color: var(--ink);
+	}
+	.ds-gallery-viewer[open] { display: flex; flex-direction: column; }
+	.ds-gallery-viewer::backdrop { background: rgb(21 44 53 / 82%); }
+	.ds-viewer-toolbar, .ds-viewer-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+		flex-shrink: 0;
+		padding: 0.25rem 1rem;
+		font-size: 0.82rem;
+	}
+	.ds-viewer-toolbar { border-bottom: 1px solid var(--line); }
+	.ds-viewer-actions { display: flex; align-items: center; gap: 0.5rem; }
+	.ds-viewer-actions a { display: inline-flex; align-items: center; min-height: 2.75rem; }
+	.ds-viewer-stage { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+	.ds-viewer-stage img { width: 100%; height: 100%; object-fit: contain; }
+	.ds-is-zoomed .ds-viewer-stage img { width: 1080px; max-width: none; height: auto; margin-inline: auto; }
+	.ds-viewer-footer { border-top: 1px solid var(--line); }
+	.ds-viewer-footer span { text-align: center; }
+	:global(html.ds-image-viewer-open) { overflow: hidden; }
+	@media (max-width: 44rem) {
+		.ds-gallery { margin-bottom: 2rem; }
+		.ds-gallery-track { width: 100%; }
+		.ds-gallery-paging { gap: 0.5rem; }
+		.ds-gallery-viewer { width: 100%; height: 100dvh; max-width: none; margin: 0; border: 0; }
+		.ds-viewer-toolbar, .ds-viewer-footer { padding-inline: 0.5rem; }
+		.ds-viewer-actions { gap: 0.25rem; }
+		.ds-viewer-footer { padding-bottom: max(0.25rem, env(safe-area-inset-bottom)); }
+	}
+	@media print { .ds-gallery { display: none; } }
+</style>

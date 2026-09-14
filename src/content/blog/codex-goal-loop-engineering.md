@@ -2,6 +2,9 @@
 title: "Loop engineering：我是怎么写 Codex 的 /goal"
 description: "围绕目标、任务文档、验证与人的反馈，组织可以持续推进的长任务。"
 pubDate: 2026-09-14T13:37:44.2625361+00:00
+relatedPosts:
+  - title: "我是怎么写 Codex 的 /goal （新）"
+    href: /blog/how-i-write-codex-goal/
 ---
 
 在我看来，Loop engineering 是提示词工程、skills 与任务自动化逐渐结合起来的一种工作方式。OpenClaw 作者 Peter Steinberger 在 X 上分享了一个想法：不要只是一轮轮 prompt coding agents，而要设计能够 prompt agents 的 loops。
