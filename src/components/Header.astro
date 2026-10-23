@@ -7,7 +7,7 @@ const isBlog = Astro.url.pathname.startsWith("/blog");
 THESIS: 文章标题直接成为入口，首页形成有主次的文章目录。
 OWN-WORLD: 保留近白纸面、宋体标题、墨色正文、朱红标记；使用开放版面。
 STORY: 浏览最新文章与并排旧文，鼠标或键盘选择，标题衔接到全文。
-FIRST VIEWPORT: 首页左侧作者导航，右侧文章目录；博文页正文居中，左右分别承载站点入口与阅读导航。
+FIRST VIEWPORT: 首页左侧简短介绍，右侧文章主次分明；博文页正文居中，左右分别承载本文信息与阅读导航。
 FORM: 根据用户对重复 CTA、文章放置与页面级动效的纠正重排；旧 A 稿已被本次指示取代。
 -->
 <a class="skip-link" href="#main-content">
@@ -32,7 +32,6 @@ FORM: 根据用户对重复 CTA、文章放置与页面级动效的纠正重排�
 <style>
   .ds-site-header {
     border-bottom: 1px solid var(--line);
-    view-transition-name: site-header;
   }
   nav {
     display: flex;

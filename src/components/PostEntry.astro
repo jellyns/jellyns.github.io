@@ -2,12 +2,14 @@
 import type { CollectionEntry } from "astro:content";
 import FormattedDate from "./FormattedDate.astro";
 import PostTitle from "./PostTitle.astro";
+import ChineseWords from "./ChineseWords.astro";
 interface Props {
   post: CollectionEntry<"blog">;
   featured?: boolean;
   compact?: boolean;
+  context?: string;
 }
-const { post, featured = false, compact = false } = Astro.props;
+const { post, featured = false, compact = false, context } = Astro.props;
 const titleId = `entry-${post.id}`;
 const Heading = compact ? "h3" : "h2";
 ---
@@ -30,6 +32,7 @@ const Heading = compact ? "h3" : "h2";
         date={post.data.pubDate}
         format={compact ? "month-day" : "compact"}
       />
+      {context && <span class="ds-entry-context">{context}</span>}
     </div>
     <div class="ds-entry-heading">
       <Heading
@@ -40,7 +43,7 @@ const Heading = compact ? "h3" : "h2";
         <PostTitle title={post.data.title} />
       </Heading>
     </div>
-    {!compact && <p>{post.data.description}</p>}
+    {!compact && <p><ChineseWords text={post.data.description} /></p>}
   </a>
 </article>
 <style>
@@ -72,7 +75,7 @@ const Heading = compact ? "h3" : "h2";
   .ds-entry-title {
     margin: 0;
     font-size: clamp(1.4rem, 2.1vw, 1.85rem);
-    line-height: 1.6;
+    line-height: 1.45;
     overflow-wrap: anywhere;
     text-wrap: pretty;
     transition: color 180ms var(--ease);
@@ -83,6 +86,7 @@ const Heading = compact ? "h3" : "h2";
     font-size: 0.9rem;
     line-height: 1.9;
     color: var(--muted);
+    text-wrap: balance;
   }
   .ds-post-link:hover .ds-entry-title,
   .ds-post-link:focus-visible .ds-entry-title {
@@ -93,15 +97,28 @@ const Heading = compact ? "h3" : "h2";
   }
   .ds-post-featured {
     grid-column: 1 / -1;
+    border-top: 0;
   }
   .ds-post-featured .ds-post-link {
-    padding-block: 2rem 2.7rem;
+    padding-block: 0 3rem;
   }
   .ds-post-featured .ds-entry-title {
-    max-width: 18em;
-    font-size: clamp(2.1rem, 3.65vw, 3.3rem);
-    line-height: 1.5;
+    max-width: 16em;
+    font-size: clamp(2.5rem, 4.4vw, 4rem);
+    line-height: 1.35;
     letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+  .ds-post-featured .ds-entry-meta {
+    margin-bottom: 1.5rem;
+  }
+  .ds-post-featured .ds-post-link::after {
+    top: auto;
+    bottom: -1px;
+  }
+  .ds-entry-context {
+    padding-left: 0.8rem;
+    border-left: 1px solid var(--line);
   }
   .ds-post-featured p {
     font-size: 1rem;
@@ -109,7 +126,7 @@ const Heading = compact ? "h3" : "h2";
   }
   .ds-post-compact .ds-post-link {
     display: grid;
-    grid-template-columns: 4rem minmax(0, 1fr);
+    grid-template-columns: max-content minmax(0, 1fr);
     align-items: baseline;
     gap: 1.5rem;
     padding-block: 1.5rem;
@@ -123,7 +140,6 @@ const Heading = compact ? "h3" : "h2";
   }
   @media (max-width: 44rem) {
     .ds-post-compact .ds-post-link {
-      grid-template-columns: 3rem minmax(0, 1fr);
       gap: 1rem;
       padding-block: 1.25rem;
     }
@@ -135,10 +151,11 @@ const Heading = compact ? "h3" : "h2";
       padding: 1.4rem 0 1.6rem;
     }
     .ds-post-featured .ds-post-link {
-      padding-block: 1.5rem 2rem;
+      padding-block: 0 2rem;
     }
     .ds-post-featured .ds-entry-title {
-      font-size: 2rem;
+      font-size: clamp(2rem, 8.8vw, 2.75rem);
+      line-height: 1.4;
     }
     .ds-post-featured p {
       font-size: 0.925rem;

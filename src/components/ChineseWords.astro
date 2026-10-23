@@ -1,0 +1,23 @@
+---
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+const words = [...new Intl.Segmenter("zh-CN", { granularity: "word" }).segment(text)];
+---
+
+{words.map(({ segment, isWordLike }) =>
+  isWordLike &&
+  segment.length > 1 &&
+  segment.length <= 8 &&
+  /\p{Script=Han}/u.test(segment) ? (
+    <span class="ds-word">{segment}</span>
+  ) : (
+    segment
+  ),
+)}
+<style>
+  .ds-word {
+    white-space: nowrap;
+  }
+</style>

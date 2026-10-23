@@ -19,6 +19,9 @@ const { posts, featured = false, compact = false } = Astro.props;
       post={post}
       featured={featured && index === 0}
       compact={compact}
+      context={featured && index > 0 && posts[0].data.relatedPosts?.some(
+        (related) => related.href === `/blog/${post.id}/`,
+      ) ? "与上篇相关" : undefined}
     />
   ))}
 </section>
@@ -30,7 +33,7 @@ const { posts, featured = false, compact = false } = Astro.props;
   }
   .ds-post-spread {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     column-gap: 2.5rem;
   }
   @media (max-width: 60rem) {

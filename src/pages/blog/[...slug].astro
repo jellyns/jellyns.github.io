@@ -24,7 +24,7 @@ const otherPosts = (await getCollection("blog"))
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 const morePosts = new Map<
   string,
-  { title: string; href: string; description?: string; related: boolean }
+  { title: string; href: string; description?: string; pubDate?: Date; related: boolean }
 >();
 // Explicit relationships survive as the archive grows; recent articles fill spare places.
 for (const related of post.data.relatedPosts ?? []) {
@@ -34,6 +34,7 @@ for (const related of post.data.relatedPosts ?? []) {
   morePosts.set(related.href, {
     ...related,
     description: match?.data.description,
+    pubDate: match?.data.pubDate,
     related: true,
   });
 }
@@ -45,6 +46,7 @@ for (const entry of otherPosts) {
       href,
       title: entry.data.title,
       description: entry.data.description,
+      pubDate: entry.data.pubDate,
       related: false,
     });
 }

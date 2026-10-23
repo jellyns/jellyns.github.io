@@ -23,10 +23,7 @@ const posts = (await getCollection("blog")).sort(
         <AuthorRail />
       </aside>
       <div class="ds-home-writing">
-        <header class="ds-home-heading">
-          <h1>文章</h1>
-          <a href="/blog/">按时间浏览</a>
-        </header>
+        <h1 class="sr-only">文章</h1>
         {posts.length ? (
           <PostCollection posts={posts} featured />
         ) : (
@@ -45,39 +42,18 @@ const posts = (await getCollection("blog")).sort(
         1fr
       );
     gap: 2.5rem;
-    padding-top: 3.5rem;
+    padding-top: var(--page-start-space);
     padding-bottom: 1rem;
   }
   .ds-home-intro {
     position: sticky;
     top: 3rem;
-    padding-top: 0.3rem;
+    padding-top: 0.25rem;
     align-self: start;
   }
   .ds-home-writing {
     grid-column: 2 / -1;
     min-width: 0;
-  }
-  .ds-home-heading {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    padding: 0 0 1.5rem;
-    gap: 1rem;
-  }
-  h1 {
-    font-size: 1.5rem;
-    margin: 0;
-    font-weight: 500;
-  }
-  .ds-home-heading a {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-height: 44px;
-    color: var(--accent-dark);
-    text-decoration: none;
-    font-size: 0.8rem;
   }
   @media (max-width: 76rem) {
     .ds-home {
@@ -85,24 +61,18 @@ const posts = (await getCollection("blog")).sort(
       gap: 2rem;
     }
   }
-  @media (max-width: 44rem) {
+  @media (max-width: 60rem) {
     .ds-home {
       display: block;
-      padding-top: 2rem;
     }
     .ds-home-intro {
       position: static;
-      padding: 0 0 1.5rem;
+      padding: 0 0 2.5rem;
     }
-    .ds-home-heading {
-      padding: 0.5rem 0 1rem;
-    }
-    h1 {
-      font-size: 1.35rem;
-      margin: 0;
-    }
-    .ds-home-heading a {
-      font-size: 0.75rem;
+  }
+  @media (max-width: 44rem) {
+    .ds-home-intro {
+      padding-bottom: 2rem;
     }
   }
 </style>

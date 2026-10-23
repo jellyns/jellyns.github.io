@@ -7,14 +7,15 @@ import Footer from "../components/Footer.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 import ArticleGallery from "../components/ArticleGallery.astro";
 import PostTitle from "../components/PostTitle.astro";
-import AuthorRail from "../components/AuthorRail.astro";
+import ChineseWords from "../components/ChineseWords.astro";
 import ReadingNav from "../components/ReadingNav.astro";
-import { SITE_AUTHOR } from "../consts";
+import CodeBlockTools from "../components/CodeBlockTools.astro";
 type Props = CollectionEntry<"blog">["data"] & {
   morePosts: {
     title: string;
     href: string;
     description?: string;
+    pubDate?: Date;
     related: boolean;
   }[];
   readingTime: number;
@@ -51,29 +52,30 @@ const sections = headings.filter((h) => h.depth === 2);
         ]}
       >
         <header class="ds-article-header">
-          <a class="ds-article-back" href="/blog/">
-            全部文章
-          </a>
           <h1 data-post-title={`post-${slug}`}>
             <PostTitle title={title} />
           </h1>
-          <div class="ds-article-meta ds-meta">
-            <FormattedDate date={pubDate} />
-            <span aria-hidden="true">·</span>
-            <span>约 {readingTime} 分钟</span>
-            <span class="ds-mobile-byline">{SITE_AUTHOR}</span>
-            {updatedDate && (
-              <>
-                <span aria-hidden="true">·</span>
-                <span>
-                  更新于 <FormattedDate date={updatedDate} />
-                </span>
-              </>
-            )}
-          </div>
         </header>
-        <aside class="ds-article-author" aria-label="作者与站点信息">
-          <AuthorRail />
+        <aside class="ds-article-context" aria-label="本文信息">
+          <dl class="ds-article-meta ds-meta">
+            <div>
+              <dt>发布</dt>
+              <dd><FormattedDate date={pubDate} /></dd>
+            </div>
+            <div>
+              <dt>阅读</dt>
+              <dd>约 {readingTime} 分钟</dd>
+            </div>
+            {updatedDate && (
+              <div class="ds-meta-updated">
+                <dt>更新</dt>
+                <dd><FormattedDate date={updatedDate} /></dd>
+              </div>
+            )}
+          </dl>
+          <a class="ds-article-back" href="/blog/" data-return-list>
+            返回文章列表
+          </a>
         </aside>
         <ReadingNav sections={sections} />
         <div class="ds-article-body">
@@ -102,34 +104,41 @@ const sections = headings.filter((h) => h.depth === 2);
             <slot />
           </div>
           <footer class="ds-article-tail" id="article-end">
+            <div class="ds-tail-heading">
+              {morePosts.length > 0 && <h2 id="next-reading-title">接着读</h2>}
+              <a class="ds-article-back" href="/blog/" data-return-list>返回文章列表</a>
+            </div>
             {morePosts.length > 0 && (
               <nav class="ds-next-reading" aria-labelledby="next-reading-title">
-                <h2 id="next-reading-title">接着读</h2>
                 <div class="ds-next-entries">
                   {morePosts.map((post) => {
+                    const postKey = post.href.split("/").filter(Boolean).at(-1);
+                    const titleId = `next-${postKey}`;
                     return (
-                      <a class="ds-entry-surface" href={post.href}>
-                        <span class="ds-meta">
-                          {post.related ? "相关版本" : "另一篇文章"}
-                        </span>
+                      <a class="ds-entry-surface" href={post.href} aria-labelledby={titleId} data-post-link>
+                        <div class="ds-next-meta ds-meta">
+                          {post.pubDate && <FormattedDate date={post.pubDate} format="compact" />}
+                          {post.related && <span>相关版本</span>}
+                        </div>
                         <h3
-                          data-post-title={`post-${post.href.split("/").filter(Boolean).at(-1)}`}
+                          id={titleId}
+                          data-post-title={`post-${postKey}`}
                         >
                           <PostTitle title={post.title} />
                         </h3>
-                        {post.description && <p>{post.description}</p>}
+                        {post.description && <p><ChineseWords text={post.description} /></p>}
                       </a>
                     );
                   })}
                 </div>
               </nav>
             )}
-            <a href="/blog/">返回文章列表</a>
           </footer>
         </div>
       </article>
     </main>
     <Footer />
+    <CodeBlockTools />
   </body>
 </html>
 <script>
@@ -179,11 +188,12 @@ const sections = headings.filter((h) => h.depth === 2);
   }
   .ds-article-body {
     grid-column: 2;
+    grid-row: 2;
     min-width: 0;
   }
   .ds-article-header {
     grid-column: 2;
-    padding: 3rem 0 2.5rem;
+    padding: var(--page-start-space) 0 2.5rem;
   }
   .ds-article-back {
     display: inline-flex;
@@ -192,21 +202,28 @@ const sections = headings.filter((h) => h.depth === 2);
     color: var(--muted);
     font-size: 0.8rem;
     text-decoration: none;
-    margin-bottom: 1.1rem;
+    margin-top: 1.25rem;
   }
   h1 {
     margin: 0;
     font-size: clamp(2rem, 3.4vw, 3rem);
-    line-height: 1.5;
+    line-height: 1.35;
     letter-spacing: -0.02em;
     text-wrap: balance;
     overflow-wrap: anywhere;
   }
   .ds-article-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 0.7rem;
-    margin-top: 1.25rem;
+    margin: 0;
+    display: grid;
+    gap: 1.25rem;
+  }
+  .ds-article-meta dt {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+  .ds-article-meta dd {
+    margin: 0;
+    color: var(--ink);
   }
   .ds-prose {
     color: var(--prose-ink);
@@ -218,20 +235,22 @@ const sections = headings.filter((h) => h.depth === 2);
     outline: none;
   }
   :global(.ds-prose p) {
-    margin: 0 0 1.4em;
+    margin: 0 0 1em;
     text-indent: 2em;
   }
   :global(.ds-prose h2) {
     font-size: 1.65rem;
-    line-height: 1.6;
-    margin: 2.5em 0 0.9em;
+    line-height: 1.5;
+    margin: 2.25em 0 0.85em;
     scroll-margin-top: 2rem;
     color: var(--ink);
+    text-wrap: balance;
   }
   :global(.ds-prose h3) {
     font-size: 1.3rem;
     margin: 2em 0 0.75em;
     scroll-margin-top: 2rem;
+    text-wrap: balance;
   }
   :global(.ds-prose li) {
     padding-left: 0.2em;
@@ -258,19 +277,34 @@ const sections = headings.filter((h) => h.depth === 2);
     margin-bottom: 0;
   }
   :global(.ds-prose pre) {
+    --astro-code-background: var(--code-surface);
+    --astro-code-foreground: var(--prose-ink);
+    --astro-code-token-comment: var(--muted);
+    --astro-code-token-keyword: var(--accent-dark);
+    --astro-code-token-string: var(--prose-ink);
+    --astro-code-token-string-expression: var(--prose-ink);
+    --astro-code-token-constant: var(--accent-dark);
+    --astro-code-token-parameter: var(--ink);
+    --astro-code-token-function: var(--ink);
+    --astro-code-token-punctuation: var(--muted);
+    --astro-code-token-link: var(--accent-dark);
     max-width: 100%;
     overflow: auto;
     background: var(--code-surface);
     border: 1px solid var(--line);
-    padding: 1.2rem;
-    margin: 1.5em 0;
-    font-size: 0.82rem;
-    line-height: 1.8;
+    padding: 3.25rem 1.25rem 1.25rem;
+    margin: 1.75rem 0;
+    font-size: 0.9rem;
+    line-height: 1.9;
     tab-size: 2;
+    scrollbar-width: thin;
   }
   :global(.ds-prose code) {
-    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    font-family: ui-monospace, SFMono-Regular, Consolas, var(--font-sans);
     font-size: 0.88em;
+  }
+  :global(.ds-prose pre code) {
+    font-size: inherit;
   }
   :global(.ds-prose :not(pre) > code) {
     background: var(--code-surface);
@@ -278,13 +312,23 @@ const sections = headings.filter((h) => h.depth === 2);
     border-radius: 3px;
     box-decoration-break: clone;
   }
-  :global(.ds-prose table) {
-    display: block;
-    width: 100%;
+  :global(.ds-prose :is(h2, h3) > code) {
+    background: none;
+    padding: 0;
+  }
+  :global(.ds-prose .ds-table-scroll) {
+    max-width: 100%;
     overflow-x: auto;
+    margin: 1.8em 0;
+    scrollbar-width: thin;
+  }
+  :global(.ds-prose .ds-table-scroll:focus-visible) {
+    outline-offset: -2px;
+  }
+  :global(.ds-prose table) {
+    width: 100%;
     border-collapse: collapse;
     font-size: 0.9rem;
-    margin: 1.8em 0;
   }
   :global(.ds-prose th),
   :global(.ds-prose td) {
@@ -292,6 +336,7 @@ const sections = headings.filter((h) => h.depth === 2);
     text-align: left;
     padding: 0.75rem 0.85rem;
     min-width: 6rem;
+    vertical-align: top;
   }
   :global(.ds-prose th) {
     background: var(--code-surface);
@@ -314,35 +359,38 @@ const sections = headings.filter((h) => h.depth === 2);
   }
   .ds-article-tail {
     margin-top: 3rem;
-    padding-top: 1.5rem;
+    padding-top: 0.75rem;
     border-top: 1px solid var(--line);
     font-size: 0.85rem;
   }
-  .ds-article-tail > a {
-    text-decoration: none;
-    display: inline-flex;
+  .ds-tail-heading {
+    display: flex;
     align-items: center;
-    min-height: 44px;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
   }
-  .ds-article-author {
+  .ds-tail-heading h2 {
+    margin: 0;
+    font: inherit;
+    color: var(--muted);
+  }
+  .ds-tail-heading .ds-article-back {
+    margin: 0;
+  }
+  .ds-article-back:hover,
+  .ds-article-back:focus-visible {
+    color: var(--accent-dark);
+  }
+  .ds-article-context {
     grid-column: 1;
     grid-row: 1 / span 2;
     position: sticky;
     top: 3rem;
-    margin-top: 3rem;
+    margin-top: var(--page-start-space);
     max-height: calc(100dvh - 6rem);
     overflow-y: auto;
     scrollbar-width: thin;
-  }
-  .ds-mobile-byline {
-    display: none;
-  }
-  .ds-next-reading {
-    margin-bottom: 2rem;
-  }
-  .ds-next-reading > h2 {
-    font-size: 1.25rem;
-    margin: 0 0 1rem;
   }
   .ds-next-entries {
     display: grid;
@@ -353,12 +401,22 @@ const sections = headings.filter((h) => h.depth === 2);
     display: block;
     text-decoration: none;
     color: var(--ink);
-    padding: 1.25rem 0 1.4rem;
-    border-top: 1px solid var(--line);
+    padding: 1.25rem 0 1.5rem;
+  }
+  .ds-next-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+  .ds-next-meta > span {
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--line);
   }
   .ds-next-entries h3 {
-    font-size: 1.2rem;
-    line-height: 1.65;
+    font-size: 1.3rem;
+    line-height: 1.5;
     margin: 0.65rem 0;
     transition: color 180ms var(--ease);
     overflow-wrap: anywhere;
@@ -368,6 +426,7 @@ const sections = headings.filter((h) => h.depth === 2);
     line-height: 1.85;
     color: var(--muted);
     margin: 0;
+    text-wrap: balance;
   }
   .ds-next-entries a:hover h3,
   .ds-next-entries a:focus-visible h3 {
@@ -417,18 +476,55 @@ const sections = headings.filter((h) => h.depth === 2);
       width: min(var(--reading-width), 100%);
       margin-inline: auto;
     }
-    .ds-article-author {
-      display: none;
+    .ds-article-context {
+      position: static;
+      margin: 0;
+      max-height: none;
+      overflow: visible;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.25rem 1.5rem;
+      padding-bottom: 1.5rem;
+      width: 100%;
     }
-    .ds-mobile-byline {
-      display: inline;
+    .ds-article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+    }
+    .ds-article-meta > div {
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
+    }
+    .ds-article-meta dt {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+    .ds-article-meta dd {
+      color: var(--muted);
+    }
+    .ds-article-meta .ds-meta-updated dt {
+      position: static;
+      width: auto;
+      height: auto;
+      clip-path: none;
+      margin: 0;
+    }
+    .ds-article-back {
+      margin: 0;
     }
     .ds-article-body,
     .ds-article-header {
       width: 100%;
     }
     .ds-article-header {
-      padding-top: 2rem;
+      padding-bottom: 1rem;
     }
     :global(.ds-prose h2),
     :global(.ds-prose h3),
@@ -448,21 +544,21 @@ const sections = headings.filter((h) => h.depth === 2);
   @media (max-width: 44rem) {
     .ds-next-entries {
       grid-template-columns: 1fr;
-      gap: 1.5rem;
+      gap: 0;
+    }
+    .ds-next-entries > a + a {
+      border-top: 1px solid var(--line);
     }
     h1 {
       font-size: 2rem;
-      line-height: 1.55;
+      line-height: 1.4;
     }
     .ds-prose {
       font-size: 1.0625rem;
       line-height: 1.9;
     }
     .ds-article-header {
-      padding-bottom: 1.7rem;
-    }
-    .ds-article-back {
-      margin-bottom: 1rem;
+      padding-bottom: 1rem;
     }
     .ds-article-meta {
       font-size: 0.75rem;
@@ -472,13 +568,13 @@ const sections = headings.filter((h) => h.depth === 2);
       margin-top: 2em;
     }
     :global(.ds-prose pre) {
-      padding: 1rem;
-      font-size: 0.76rem;
+      padding: 3.25rem 1rem 1rem;
+      font-size: 0.875rem;
     }
   }
   @media print {
-    .ds-article-author,
-    .ds-next-reading {
+    .ds-article-back,
+    .ds-article-tail {
       display: none;
     }
     .ds-article-layout {
@@ -488,8 +584,16 @@ const sections = headings.filter((h) => h.depth === 2);
     .ds-article-header {
       padding: 0;
     }
+    .ds-article-context {
+      position: static;
+      margin: 1rem 0;
+    }
     .ds-prose {
       font-size: 11pt;
+    }
+    :global(.ds-prose pre) {
+      padding: 1rem;
+      white-space: pre-wrap;
     }
   }
 </style>

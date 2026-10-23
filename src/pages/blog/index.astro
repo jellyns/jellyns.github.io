@@ -54,7 +54,7 @@ const years = [
     column-gap: 2.5rem;
   }
   .ds-archive-heading {
-    padding: 3.5rem 0 3rem;
+    padding: var(--page-start-space) 0 3rem;
     row-gap: 1rem;
   }
   .ds-archive-heading h1,
@@ -85,17 +85,17 @@ const years = [
   @media (max-width: 76rem) {
     .ds-archive-heading,
     .ds-archive-year {
-      grid-template-columns: 8rem minmax(0, 1fr);
+      grid-template-columns: 11rem minmax(0, 1fr);
       column-gap: 2rem;
     }
   }
-  @media (max-width: 44rem) {
+  @media (max-width: 60rem) {
     .ds-archive-heading,
     .ds-archive-year {
       display: block;
     }
     .ds-archive-heading {
-      padding: 2rem 0;
+      padding-bottom: 2rem;
     }
     .ds-archive-heading p {
       margin-top: 0.75rem;
@@ -104,6 +104,8 @@ const years = [
       padding: 0 0 1rem;
       font-size: 1.35rem;
     }
+  }
+  @media (max-width: 44rem) {
     h1 {
       font-size: 2rem;
     }

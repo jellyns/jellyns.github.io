@@ -12,6 +12,7 @@
   --site-width: 75rem;
   --reading-width: 42rem;
   --page-gutter: clamp(1.25rem, 4.5vw, 4.5rem);
+  --page-start-space: 4rem;
   --font-sans:
     ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -21,11 +22,20 @@
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   color-scheme: light;
 }
+@media (max-width: 76rem) {
+  :root { --page-start-space: 3rem; }
+}
+@media (max-width: 44rem) {
+  :root { --page-start-space: 2rem; }
+}
 * {
   box-sizing: border-box;
 }
 html {
   background: var(--paper);
+  /* Only the selected title is captured. Capturing root makes live controls
+     lose pointer hit-testing while the snapshot animation is running. */
+  view-transition-name: none;
   scrollbar-gutter: stable;
   scroll-behavior: smooth;
   scroll-padding-top: 2rem;
@@ -101,7 +111,7 @@ img {
   inset: 0 -1rem;
   z-index: -1;
   background: var(--code-surface);
-  opacity: 0;
+  opacity: var(--entry-opacity, 0);
   transition: opacity 240ms var(--ease);
   pointer-events: none;
 }
@@ -118,22 +128,35 @@ img {
   transition: transform 360ms var(--ease);
   pointer-events: none;
 }
-.ds-entry-surface:focus-visible::before {
-  opacity: 0.65;
+.ds-entry-surface:focus-visible {
+  --entry-opacity: 0.65;
 }
 .ds-entry-surface:focus-visible::after {
   transform: scaleX(1);
 }
 @media (hover: hover) and (pointer: fine) {
-  .ds-entry-surface:hover::before {
-    opacity: 0.65;
+  .ds-entry-surface:hover {
+    --entry-opacity: 0.65;
   }
   .ds-entry-surface:hover::after {
     transform: scaleX(1);
   }
 }
-.ds-entry-surface:active::before {
-  opacity: 1;
+.ds-entry-surface:active {
+  --entry-opacity: 1;
+}
+.ds-entry-surface[data-opening] {
+  --entry-opacity: 0.65;
+}
+.ds-entry-surface[data-opening]::after {
+  transform: scaleX(1);
+}
+.ds-entry-surface[data-returned]::before {
+  animation: ds-return-to-entry 900ms var(--ease) both;
+}
+@keyframes ds-return-to-entry {
+  from { opacity: 0.8; }
+  to { opacity: var(--entry-opacity, 0); }
 }
 .skip-link {
   position: fixed;
@@ -168,37 +191,32 @@ img {
   animation-duration: 460ms;
   animation-timing-function: var(--ease);
 }
-::view-transition-old(root) {
-  animation: ds-out 150ms ease-out both;
+/* Supporting content enters as live DOM, so navigation stays interactive. */
+html[data-page-enter] .ds-article-body {
+  animation: ds-content-in 360ms var(--ease);
 }
-::view-transition-new(root) {
-  animation: ds-in 360ms 60ms var(--ease) both;
-}
-/* The masthead and author remain visual anchors while the title changes place. */
-::view-transition-old(site-header),
-::view-transition-new(site-header),
-::view-transition-old(site-author),
-::view-transition-new(site-author) {
-  mix-blend-mode: normal;
-  animation: none;
-}
-::view-transition-old(site-header),
-::view-transition-old(site-author) {
-  display: none;
+html[data-page-enter] :is(
+  .ds-article-context, .ds-reading-nav,
+  .ds-home-intro, .ds-entry-meta, .ds-post-link > p
+) {
+  animation: ds-context-in 260ms var(--ease);
 }
 html[data-astro-transition] {
   scroll-behavior: auto;
 }
-@keyframes ds-out {
+@keyframes ds-content-in {
+  from {
+    opacity: 0.6;
+    transform: translateY(4px);
+  }
   to {
-    opacity: 0;
+    opacity: 1;
+    transform: translateY(0);
   }
 }
-@keyframes ds-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
+@keyframes ds-context-in {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),

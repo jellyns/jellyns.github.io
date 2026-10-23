@@ -240,7 +240,7 @@ const { sections } = Astro.props;
     grid-row: 1 / span 2;
     position: sticky;
     top: 3rem;
-    margin-top: 3rem;
+    margin-top: var(--page-start-space);
     max-height: calc(100dvh - 6rem);
     overflow-y: auto;
     scrollbar-width: thin;
@@ -316,8 +316,8 @@ const { sections } = Astro.props;
     background: var(--accent);
     opacity: 0;
     transition:
-      transform 240ms var(--ease),
-      height 240ms var(--ease),
+      transform 180ms var(--ease),
+      height 180ms var(--ease),
       opacity 180ms;
     pointer-events: none;
   }

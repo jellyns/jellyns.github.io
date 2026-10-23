@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-23T00:34:46.5882399+08:00",
+  "generatedAt": "2026-10-23T12:32:50.329282+00:00",
   "title": "Design System: 乙辛Zmod31 · blog",
   "extensions": {
     "colorMeta": {
@@ -56,11 +56,11 @@
       {
         "name": "shared-element",
         "value": "460ms cubic-bezier(.16,1,.3,1)",
-        "purpose": "ClientRouter 同文档导航，仅衔接当前可见标题；刊头和作者栏稳定"
+        "purpose": "仅衔接当前可见标题；根页面与刊头不参与快照，保持指针可用；其余内容使用普通 CSS 淡入"
       },
       {
         "name": "toc-marker",
-        "value": "240ms cubic-bezier(.16,1,.3,1)",
+        "value": "180ms cubic-bezier(.16,1,.3,1)",
         "purpose": "桌面章节标记与滚动位置线；小屏吸顶目录显示当前章与进度，按屏幕剩余高度展开；180ms 淡入与 4px 位移，减少动态时禁用"
       },
       {
@@ -77,6 +77,16 @@
         "name": "article-selection",
         "value": "240ms opacity; 360ms line transform",
         "purpose": "首页、索引与文末入口共用局部纸色和细线反馈"
+      },
+      {
+        "name": "reading-entrance",
+        "value": "360ms body / 260ms context",
+        "purpose": "正文从 0.6 透明度与下方 4px 进入；目录、元信息和列表辅助文字仅淡入，位置稳定"
+      },
+      {
+        "name": "restored-list",
+        "value": "900ms entry cue",
+        "purpose": "恢复列表时不重播整组入场；提示衔接当前悬停或焦点底色"
       }
     ],
     "breakpoints": [
@@ -85,11 +95,11 @@
         "value": "40rem"
       },
       {
-        "name": "简介置顶",
+        "name": "紧凑字号与文末推荐单列",
         "value": "44rem"
       },
       {
-        "name": "文章目录单列",
+        "name": "文章目录单列、简介与年份置顶",
         "value": "60rem"
       },
       {
@@ -110,14 +120,14 @@
       "kind": "custom",
       "refersTo": "post-entry",
       "html": "<a class=\"ds-sample-entry\" href=\"/blog/why-i-keep-building-a-personal-knowledge-base/\"><time>2026.08.14</time><div class=\"ds-sample-heading\"><h2>我为什么一直在折腾个人知识库？</h2></div><p>从纸质笔记到 Obsidian，我真正想留下什么。</p></a>",
-      "css": ".ds-sample-entry{display:block;border-top:1px solid var(--line);padding:1.65rem 0 1.9rem;text-decoration:none;color:var(--ink);font-family:var(--font-sans)}.ds-sample-entry time{font-size:.75rem;color:var(--muted)}.ds-sample-heading{display:flex;align-items:baseline;gap:1.2rem;justify-content:space-between;margin-top:1.1rem}.ds-sample-entry h2{margin:0;font-family:var(--font-display);font-size:clamp(1.4rem,2.1vw,1.85rem);line-height:1.6}.ds-sample-entry p{font-size:.9rem;line-height:1.9;color:var(--muted);margin:1rem 0 0}.ds-sample-entry:hover h2{color:var(--accent-dark)}.ds-sample-entry:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}"
+      "css": ".ds-sample-entry{display:block;border-top:1px solid var(--line);padding:1.65rem 0 1.9rem;text-decoration:none;color:var(--ink);font-family:var(--font-sans)}.ds-sample-entry time{font-size:.75rem;color:var(--muted)}.ds-sample-heading{display:flex;align-items:baseline;gap:1.2rem;justify-content:space-between;margin-top:1.1rem}.ds-sample-entry h2{margin:0;font-family:var(--font-display);font-size:clamp(1.4rem,2.1vw,1.85rem);line-height:1.45}.ds-sample-entry p{font-size:.9rem;line-height:1.9;color:var(--muted);margin:1rem 0 0}.ds-sample-entry:hover h2{color:var(--accent-dark)}.ds-sample-entry:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}"
     },
     {
       "name": "连续正文",
       "kind": "custom",
       "refersTo": "article-prose",
       "html": "<div class=\"ds-sample-prose\"><p>我有意识地折腾个人笔记和知识库，已经好几年了。</p><h2>纸质笔记：最早想留下的，是可翻阅的痕迹</h2></div>",
-      "css": ".ds-sample-prose{max-width:42rem;font:1.125rem/1.9 var(--font-sans);color:var(--prose-ink)}.ds-sample-prose p{text-indent:2em;margin:0 0 1.4em}.ds-sample-prose h2{font-family:var(--font-display);font-size:1.65rem;line-height:1.6;margin:2.5em 0 .9em;color:var(--ink)}"
+      "css": ".ds-sample-prose{max-width:42rem;font:1.125rem/1.9 var(--font-sans);color:var(--prose-ink)}.ds-sample-prose p{text-indent:2em;margin:0 0 1em}.ds-sample-prose h2{font-family:var(--font-display);font-size:1.65rem;line-height:1.5;margin:2.25em 0 .85em;color:var(--ink);text-wrap:balance}"
     },
     {
       "name": "图册按钮",
@@ -129,7 +139,7 @@
   ],
   "narrative": {
     "northStar": "乙辛Zmod31 · blog",
-    "overview": "文章标题与摘要构成版面的主要内容，作者身份与站点入口形成可复用的左侧窄栏。宋体标题与无衬线正文形成分工，连续长文保持稳定；导航、目录和图文版承担辅助阅读。\n\n动效表现页面之间的连续性和操作反馈。文章选择使用局部纸色与细线反馈，不在条目之间移动大面积背景；正文不逐段隐藏或飞入。系统要求减少动态时停止非必要动画。",
+    "overview": "文章标题与摘要构成版面的主要内容，首页左侧介绍写作关注，文章页左侧提供本文信息。宋体标题与无衬线正文形成分工，连续长文保持稳定；导航、目录和图文版承担辅助阅读。\n\n动效表现页面之间的连续性和操作反馈。文章选择使用局部纸色与细线反馈，不在条目之间移动大面积背景；正文不逐段隐藏或飞入。系统要求减少动态时停止非必要动画。",
     "keyCharacteristics": [
       "近白纸面、墨色文字、朱红标记。",
       "宋体标题、无衬线正文、开放版面与细线。",

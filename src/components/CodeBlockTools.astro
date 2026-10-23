@@ -1,0 +1,158 @@
+<script>
+  import { onPageLoad } from "../scripts/page-lifecycle";
+
+  onPageLoad((signal) => {
+    const timers = new Set<ReturnType<typeof setTimeout>>();
+
+    document.querySelectorAll<HTMLPreElement>(".ds-prose pre").forEach((pre) => {
+      const code = pre.querySelector("code");
+      if (!code) return;
+
+      // Replace old controls if the same DOM is initialized again.
+      let block = pre.closest<HTMLDivElement>(".ds-code-block");
+      if (!block) {
+        block = document.createElement("div");
+        block.className = "ds-code-block";
+        pre.before(block);
+        block.append(pre);
+      }
+      block.querySelector(".ds-code-copy")?.remove();
+      block.querySelector(".ds-code-status")?.remove();
+      pre.tabIndex = 0;
+      pre.setAttribute("aria-label", "代码示例");
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "ds-code-copy";
+      button.setAttribute("aria-label", "复制此代码示例");
+      button.innerHTML = `<svg viewBox="0 0 20 20" aria-hidden="true"><g class="ds-copy-icon"><path d="M6.5 5.5v-2h10v11h-2"/><rect x="3.5" y="6.5" width="10" height="11" rx="1"/></g><path class="ds-copied-icon" d="m4 10 4 4 8-8"/></svg><span>复制</span>`;
+      const label = button.querySelector("span")!;
+      const status = document.createElement("span");
+      status.className = "ds-code-status";
+      status.setAttribute("role", "status");
+      status.setAttribute("aria-live", "polite");
+      block.append(button, status);
+
+      let pending = false;
+      let resetTimer: ReturnType<typeof setTimeout> | undefined;
+      button.addEventListener("click", async () => {
+        if (pending) return;
+        if (resetTimer !== undefined) {
+          clearTimeout(resetTimer);
+          timers.delete(resetTimer);
+        }
+        pending = true;
+        button.setAttribute("aria-busy", "true");
+        button.removeAttribute("data-copied");
+        status.removeAttribute("data-error");
+        status.textContent = "";
+        label.textContent = "复制中";
+        try {
+          await navigator.clipboard.writeText(code.textContent ?? "");
+          if (signal.aborted) return;
+          button.dataset.copied = "";
+          label.textContent = "已复制";
+          status.textContent = "代码示例已复制。";
+          resetTimer = setTimeout(() => {
+            button.removeAttribute("data-copied");
+            label.textContent = "复制";
+            timers.delete(resetTimer!);
+          }, 1800);
+          timers.add(resetTimer);
+        } catch {
+          if (signal.aborted) return;
+          label.textContent = "重试";
+          status.dataset.error = "";
+          status.textContent = "未能复制，请选中文字后复制。";
+        } finally {
+          pending = false;
+          button.removeAttribute("aria-busy");
+        }
+      }, { signal });
+    });
+
+    return () => timers.forEach(clearTimeout);
+  });
+</script>
+
+<style is:global>
+  .ds-code-block {
+    position: relative;
+    min-width: 0;
+    margin: 1.75rem 0;
+  }
+  .ds-prose .ds-code-block pre {
+    margin: 0;
+  }
+  .ds-code-block pre:focus-visible {
+    outline-offset: -2px;
+  }
+  .ds-code-copy {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-width: 5.5rem;
+    min-height: 44px;
+    padding: 0.4rem 0.6rem;
+    border: 0;
+    border-radius: 3px;
+    background: var(--code-surface);
+    color: var(--muted);
+    font: 0.8125rem/1.5 var(--font-sans);
+    transition: color 180ms var(--ease), background-color 180ms var(--ease);
+  }
+  .ds-code-copy:hover,
+  .ds-code-copy:focus-visible {
+    color: var(--accent-dark);
+    background: var(--accent-soft);
+  }
+  .ds-code-copy:focus-visible {
+    outline-offset: -2px;
+  }
+  .ds-code-copy[data-copied] {
+    color: var(--accent-dark);
+  }
+  .ds-code-copy svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .ds-copy-icon,
+  .ds-copied-icon {
+    transition: opacity 180ms var(--ease);
+  }
+  .ds-copied-icon,
+  .ds-code-copy[data-copied] .ds-copy-icon {
+    opacity: 0;
+  }
+  .ds-code-copy[data-copied] .ds-copied-icon {
+    opacity: 1;
+  }
+  .ds-code-status:not([data-error]) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .ds-code-status[data-error] {
+    display: block;
+    padding: 0.5rem 0;
+    color: var(--accent-dark);
+    font: 0.8125rem/1.6 var(--font-sans);
+  }
+  @media print {
+    .ds-code-copy,
+    .ds-code-status {
+      display: none;
+    }
+  }
+</style>

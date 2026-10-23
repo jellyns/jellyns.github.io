@@ -58,14 +58,47 @@ const { title, description, image } = Astro.props;
 
 <script>
   let navigation = 0;
+  type ListVisit = { path: string; scrollY: number; title: string };
+  // Keep reading context in this tab only; direct visits retain ordinary links.
+  const articleOrigins = new Map<string, ListVisit>();
+  let returning: ListVisit | undefined;
+  let restoreListScroll = false;
+  const isList = (path: string) => path === "/" || path === "/blog/";
+  const isArticle = (path: string) => /^\/blog\/[^/]+\/$/.test(path);
   // Match only the title being entered or left, never every title in the index.
   document.addEventListener("astro:before-preparation", (event) => {
     navigation++;
+    returning = undefined;
+    restoreListScroll = false;
+    const entry = event.sourceElement?.closest<HTMLElement>("[data-post-link]");
+    entry?.setAttribute("data-opening", "");
+    event.signal.addEventListener("abort", () => entry?.removeAttribute("data-opening"), { once: true });
+    const origin = isList(event.from.pathname) && isArticle(event.to.pathname)
+      ? {
+          path: event.from.pathname,
+          scrollY: window.scrollY,
+          title: entry?.querySelector<HTMLElement>("[data-post-title]")?.dataset.postTitle || "",
+        }
+      : articleOrigins.get(event.from.pathname);
     const load = event.loader;
     event.loader = async () => {
-      await load();
+      try {
+        await load();
+      } finally {
+        entry?.removeAttribute("data-opening");
+      }
       if (event.signal.aborted || event.defaultPrevented) return;
+      if (isArticle(event.to.pathname) && origin)
+        articleOrigins.set(event.to.pathname, origin);
+      if (isList(event.to.pathname) && origin?.path === event.to.pathname &&
+          (event.navigationType === "traverse" || event.sourceElement?.closest("[data-return-list]"))) {
+        returning = origin;
+        // Astro restores traversal scroll itself. Only explicit return links need it.
+        restoreListScroll = event.navigationType !== "traverse";
+      }
       const incoming = event.newDocument;
+      // A restored list is already familiar; only its originating entry needs a cue.
+      incoming.documentElement.toggleAttribute("data-page-enter", !returning);
       const oldTitles = [
         ...document.querySelectorAll<HTMLElement>("[data-post-title]"),
       ];
@@ -101,5 +134,40 @@ const { title, description, image } = Astro.props;
           title.style.removeProperty("view-transition-name");
         });
     });
+  });
+  document.addEventListener("astro:after-swap", () => {
+    if (returning && restoreListScroll)
+      window.scrollTo({ top: returning.scrollY, behavior: "instant" });
+  });
+  document.addEventListener("astro:page-load", () => {
+    const origin = articleOrigins.get(location.pathname);
+    document.querySelectorAll<HTMLAnchorElement>("[data-return-list]").forEach((link) => {
+      if (!origin) return;
+      link.href = origin.path;
+      link.textContent = origin.path === "/" ? "返回首页" : "返回文章列表";
+    });
+    if (returning) {
+      const title = [...document.querySelectorAll<HTMLElement>("[data-post-title]")]
+        .find((element) => element.dataset.postTitle === returning!.title);
+      const link = title?.closest<HTMLAnchorElement>("[data-post-link]");
+      if (link) {
+        link.focus({ preventScroll: true });
+        if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          // Descendant entrances also bubble animationend; only the return cue
+          // itself may clear this state, including when motion is interrupted.
+          const clearCue = (event: AnimationEvent) => {
+            if (event.target !== link || event.animationName !== "ds-return-to-entry") return;
+            link.removeEventListener("animationend", clearCue);
+            link.removeEventListener("animationcancel", clearCue);
+            link.removeAttribute("data-returned");
+          };
+          link.addEventListener("animationend", clearCue);
+          link.addEventListener("animationcancel", clearCue);
+          link.setAttribute("data-returned", "");
+        }
+      }
+      returning = undefined;
+      restoreListScroll = false;
+    }
   });
 </script>
