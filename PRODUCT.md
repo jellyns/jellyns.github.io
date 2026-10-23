@@ -42,7 +42,7 @@ web
 ## Evidence on Hand
 
 - 已上线站点：`https://jellyns.github.io/`
-- 当前正式文章：`src/content/blog/why-i-keep-building-a-personal-knowledge-base.md`
+- 正式文章以 `src/content/blog/` 为准；本轮改造时包含个人知识库文章与两篇 Codex /goal 文章，共三篇。
 - 已有 RSS、Sitemap、GitHub Actions 和 GitHub Pages 部署流程。
 - 当前没有读者评价、流量数据或其他可公开引用的社会证明，不得虚构。
 

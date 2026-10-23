@@ -1,0 +1,448 @@
+---
+interface Props {
+  sections: { slug: string; text: string }[];
+}
+const { sections } = Astro.props;
+---
+
+<aside class="ds-reading-nav" aria-label="阅读导航" data-reading-nav>
+  {sections.length > 1 && (
+    <details open data-toc>
+      <summary aria-label="本文目录">
+        <span class="ds-toc-label">本文目录</span>
+        <span
+          class="ds-current-section"
+          data-current-section
+          aria-hidden="true"
+        ></span>
+        <span class="ds-toc-chevron" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="m3 4.5 3 3 3-3" stroke="currentColor" stroke-width="1" />
+          </svg>
+        </span>
+      </summary>
+      <nav aria-label="本文目录">
+        <ol>
+          <li>
+            <a href="#full-text">开篇</a>
+          </li>
+          {sections.map((section) => (
+            <li>
+              <a href={"#" + section.slug}>{section.text}</a>
+            </li>
+          ))}
+        </ol>
+        <span class="ds-toc-marker" aria-hidden="true"></span>
+      </nav>
+    </details>
+  )}
+  <div class="ds-reading-position" data-reading-position hidden>
+    <div class="ds-position-label">
+      <span>正文位置</span>
+      <span data-reading-percent>0%</span>
+    </div>
+    <div class="ds-position-track" aria-hidden="true">
+      <span data-reading-line></span>
+    </div>
+  </div>
+  <div class="ds-reading-actions">
+    <a href="#main-content">回到开头</a>
+    <a href="#article-end">到文末</a>
+  </div>
+</aside>
+<script>
+  import { onPageLoad } from "../scripts/page-lifecycle";
+  onPageLoad((signal) => {
+    const rail = document.querySelector<HTMLElement>("[data-reading-nav]");
+    const prose = document.getElementById("full-text");
+    if (rail && prose) {
+      const toc = rail.querySelector<HTMLDetailsElement>("[data-toc]");
+      const menu = toc?.querySelector("nav");
+      const summary = toc?.querySelector("summary");
+      const wide = matchMedia("(width > 76rem)");
+      const syncLayout = () => {
+        if (toc) toc.open = wide.matches;
+        schedule();
+      };
+      const links = [...rail.querySelectorAll<HTMLAnchorElement>("nav a")];
+      const headings = links.map((link) =>
+        document.getElementById(decodeURIComponent(link.hash.slice(1))),
+      );
+      const marker = rail.querySelector<HTMLElement>(".ds-toc-marker");
+      const position = rail.querySelector<HTMLElement>(
+        "[data-reading-position]",
+      )!;
+      const percent = rail.querySelector<HTMLElement>(
+        "[data-reading-percent]",
+      )!;
+      const line = rail.querySelector<HTMLElement>("[data-reading-line]")!;
+      const currentSection = rail.querySelector<HTMLElement>(
+        "[data-current-section]",
+      );
+      let frame = 0,
+        pending = false,
+        active = -2,
+        lastPercent = -1;
+      function fitMenu() {
+        if (!menu || !summary) return;
+        if (!wide.matches && toc?.open) {
+          const viewport = window.visualViewport;
+          const bottom = viewport
+            ? viewport.offsetTop + viewport.height
+            : window.innerHeight;
+          const available = Math.max(
+            0,
+            Math.floor(bottom - summary.getBoundingClientRect().bottom - 12),
+          );
+          menu.style.setProperty("--toc-available-height", `${available}px`);
+        } else menu.style.removeProperty("--toc-available-height");
+      }
+      function update() {
+        pending = false;
+        fitMenu();
+        const bounds = prose!.getBoundingClientRect();
+        const progress = Math.max(
+          0,
+          Math.min(
+            1,
+            (160 - bounds.top) /
+              Math.max(1, bounds.height - window.innerHeight + 160),
+          ),
+        );
+        const rounded = Math.round(progress * 100);
+        if (rounded !== lastPercent) {
+          percent.textContent = `${rounded}%`;
+          lastPercent = rounded;
+        }
+        line.style.transform = `scaleX(${progress})`;
+        rail!.style.setProperty("--reading-progress", String(progress));
+        rail!.toggleAttribute(
+          "data-stuck",
+          !wide.matches && rail!.getBoundingClientRect().top <= 1,
+        );
+        let index = -1;
+        headings.forEach((heading, i) => {
+          if (heading && heading.getBoundingClientRect().top <= 160) index = i;
+        });
+        const changed = index !== active;
+        if (changed) {
+          links.forEach((link, i) => {
+            if (i === index) link.setAttribute("aria-current", "location");
+            else link.removeAttribute("aria-current");
+          });
+          active = index;
+          if (currentSection)
+            currentSection.textContent = links[index]?.textContent || "";
+        }
+        const link = links[index];
+        if (marker) {
+          marker.style.opacity = link ? "1" : "0";
+          if (link) {
+            marker.style.transform = `translateY(${link.offsetTop}px)`;
+            marker.style.height = `${link.offsetHeight}px`;
+          }
+        }
+        // Keep the active heading visible in a long rail without moving the document.
+        if (changed && link && wide.matches && !rail!.matches(":hover")) {
+          const row = link.getBoundingClientRect(),
+            area = rail!.getBoundingClientRect();
+          if (row.bottom > area.bottom - 24)
+            rail!.scrollTop += row.bottom - area.bottom + 24;
+          else if (row.top < area.top + 24)
+            rail!.scrollTop -= area.top + 24 - row.top;
+        }
+      }
+      function schedule() {
+        if (!pending) {
+          pending = true;
+          frame = requestAnimationFrame(update);
+        }
+      }
+      position.hidden = false;
+      syncLayout();
+      wide.addEventListener("change", syncLayout, { signal });
+      window.addEventListener("scroll", schedule, { passive: true, signal });
+      window.addEventListener("resize", schedule, { signal });
+      window.addEventListener("pageshow", schedule, { signal });
+      window.visualViewport?.addEventListener("resize", schedule, { signal });
+      window.visualViewport?.addEventListener("scroll", schedule, { signal });
+      toc?.addEventListener("toggle", () => {
+        schedule();
+        fitMenu();
+        if (!wide.matches && toc.open) {
+          const current = links[active];
+          if (menu && current)
+            menu.scrollTop = Math.max(
+              0,
+              current.offsetTop -
+                (menu.clientHeight - current.offsetHeight) / 2,
+            );
+        }
+      });
+      // The small-screen directory stays available without shifting the article.
+      rail.addEventListener("click", (event) => {
+        const link = (event.target as Element).closest<HTMLAnchorElement>(
+          "nav a",
+        );
+        if (!wide.matches && link && toc) {
+          toc.open = false;
+          const target = document.getElementById(
+            decodeURIComponent(link.hash.slice(1)),
+          );
+          if (target) {
+            target.tabIndex = -1;
+            target.focus({ preventScroll: true });
+          }
+        }
+      });
+      document.addEventListener(
+        "click",
+        (event) => {
+          if (
+            !wide.matches &&
+            toc?.open &&
+            !rail.contains(event.target as Node)
+          )
+            toc.open = false;
+        },
+        { signal },
+      );
+      rail.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !wide.matches && toc?.open) {
+          toc.open = false;
+          toc.querySelector("summary")?.focus({ preventScroll: true });
+        }
+      });
+      rail.addEventListener("focusout", (event) => {
+        if (
+          !wide.matches &&
+          toc?.open &&
+          event.relatedTarget instanceof Node &&
+          !rail.contains(event.relatedTarget)
+        )
+          toc.open = false;
+      });
+      const observer = new ResizeObserver(schedule);
+      observer.observe(document.querySelector(".ds-article-body") || prose);
+      document.fonts.ready.then(() => {
+        if (!signal.aborted) schedule();
+      });
+      return () => {
+        observer.disconnect();
+        cancelAnimationFrame(frame);
+      };
+    }
+  });
+</script>
+<style>
+  .ds-reading-nav {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    position: sticky;
+    top: 3rem;
+    margin-top: 3rem;
+    max-height: calc(100dvh - 6rem);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    padding-right: 0.25rem;
+    min-width: 0;
+  }
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    color: var(--ink);
+    font-size: 0.8125rem;
+    list-style: none;
+    cursor: pointer;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  .ds-toc-chevron {
+    width: 1.5rem;
+    height: 1.5rem;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .ds-current-section {
+    display: none;
+  }
+  summary svg {
+    transition: transform 200ms var(--ease);
+  }
+  details[open] summary svg {
+    transform: rotate(180deg);
+  }
+  nav {
+    position: relative;
+    margin: 0.75rem 0 1.5rem;
+  }
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  li {
+    margin: 0.2rem 0;
+  }
+  nav a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.45rem 0.25rem 0.45rem 1rem;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.8125rem;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+  }
+  nav a:hover,
+  nav a:focus-visible,
+  nav a[aria-current] {
+    color: var(--accent-dark);
+  }
+  nav a:focus-visible {
+    outline-offset: -2px;
+    background: var(--accent-soft);
+  }
+  .ds-toc-marker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    background: var(--accent);
+    opacity: 0;
+    transition:
+      transform 240ms var(--ease),
+      height 240ms var(--ease),
+      opacity 180ms;
+    pointer-events: none;
+  }
+  .ds-reading-position {
+    margin: 1.5rem 0 0.5rem;
+  }
+  .ds-position-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .ds-position-track {
+    margin-top: 0.75rem;
+    height: 1px;
+    background: var(--line);
+    overflow: hidden;
+  }
+  .ds-position-track span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform: scaleX(0);
+    transform-origin: left;
+    background: var(--accent);
+  }
+  .ds-reading-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+  }
+  .ds-reading-actions a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--muted);
+    font-size: 0.75rem;
+    text-decoration: none;
+  }
+  .ds-reading-actions a:hover {
+    color: var(--accent-dark);
+  }
+  @media (max-width: 76rem) {
+    .ds-reading-nav {
+      width: 100%;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      margin: 0 0 1.5rem;
+      padding: 0;
+      max-height: none;
+      overflow: visible;
+      background: var(--paper);
+    }
+    summary {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 1rem;
+      padding: 0.7rem 0;
+      border-block: 1px solid var(--line);
+    }
+    summary::after {
+      content: "";
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--accent);
+      transform: scaleX(var(--reading-progress, 0));
+      transform-origin: left;
+    }
+    .ds-current-section {
+      display: block;
+      color: var(--muted);
+      font-size: 0.75rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 180ms var(--ease);
+    }
+    .ds-reading-nav[data-stuck] .ds-current-section {
+      opacity: 1;
+    }
+    nav {
+      position: absolute;
+      top: 100%;
+      inset-inline: 0;
+      max-height: min(60dvh, 28rem, var(--toc-available-height, 60dvh));
+      overflow-y: auto;
+      overscroll-behavior-y: contain;
+      margin: 0;
+      padding: 0.5rem 0 0.75rem;
+      background: var(--paper);
+      border-bottom: 1px solid var(--line);
+    }
+    nav a {
+      font-size: 0.875rem;
+      padding-block: 0.6rem;
+    }
+    details[open] nav {
+      animation: ds-toc-open 180ms var(--ease);
+    }
+    .ds-reading-position,
+    .ds-reading-actions {
+      display: none;
+    }
+    .ds-reading-nav:not(:has(details)) {
+      display: none;
+    }
+  }
+  @keyframes ds-toc-open {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+  @media print {
+    .ds-reading-nav {
+      display: none;
+    }
+  }
+</style>

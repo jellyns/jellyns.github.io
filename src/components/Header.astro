@@ -1,81 +1,135 @@
 ---
-import { SITE_AUTHOR } from '../consts';
-import HeaderLink from './HeaderLink.astro';
+import { SITE_AUTHOR } from "../consts";
+const isBlog = Astro.url.pathname.startsWith("/blog");
 ---
 
 <!--
-THESIS: 以作者和真实文章建立连续写作空间，拒绝卡片模板与强制分类。
-OWN-WORLD: 冷白底、墨蓝字、蓝绿色强调、细分隔线和克制的无衬线中文排版。
-STORY: 读者先认识乙辛Zmod31，再进入最新文章或按时间浏览全部写作。
-FIRST VIEWPORT: 主页分栏呈现身份与关注方向并连接最新文章；目录使用连续索引；文章页左对齐进入正文。
-FORM: 采用已确认的 A 主页与 C 目录组合，folio/index 排位 6，staging 为 split opening + chronological ledger，seed 3fcfa4a3。
+THESIS: 文章标题直接成为入口，首页形成有主次的文章目录。
+OWN-WORLD: 保留近白纸面、宋体标题、墨色正文、朱红标记；使用开放版面。
+STORY: 浏览最新文章与并排旧文，鼠标或键盘选择，标题衔接到全文。
+FIRST VIEWPORT: 首页左侧作者导航，右侧文章目录；博文页正文居中，左右分别承载站点入口与阅读导航。
+FORM: 根据用户对重复 CTA、文章放置与页面级动效的纠正重排；旧 A 稿已被本次指示取代。
 -->
-<a class="skip-link" href="#main-content">跳到正文</a>
-<header class="site-header">
-	<nav class="site-nav" aria-label="主导航">
-		<a class="site-brand" href="/">{SITE_AUTHOR}</a>
-		<div class="site-links">
-			<HeaderLink href="/blog/">blog</HeaderLink>
-			<a href="/rss.xml">RSS</a>
-		</div>
-	</nav>
+<a class="skip-link" href="#main-content">
+  跳到正文
+</a>
+<header class="ds-site-header ds-container">
+  <nav aria-label="主导航">
+    <a class="ds-brand" href="/" aria-label={SITE_AUTHOR + "，首页"}>
+      {SITE_AUTHOR}
+      <span>blog</span>
+    </a>
+    <div class="ds-nav-links">
+      <a href="/blog/" aria-current={isBlog ? "page" : undefined}>
+        文章
+      </a>
+      <a href="/rss.xml" data-astro-reload>
+        RSS
+      </a>
+    </div>
+  </nav>
 </header>
-
 <style>
-	.site-header {
-		border-bottom: 1px solid var(--line);
-		background: color-mix(in srgb, var(--paper) 94%, transparent);
-	}
-	.site-nav {
-		width: min(var(--site-width), calc(100% - 2 * var(--page-gutter)));
-		height: 5.5rem;
-		margin-inline: auto;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-	}
-	.site-brand {
-		color: var(--ink);
-		font-size: 1rem;
-		font-weight: 720;
-		letter-spacing: -0.02em;
-		text-decoration: none;
-	}
-	.site-links {
-		display: flex;
-		align-items: center;
-		gap: 1.75rem;
-	}
-	.site-links :global(a) {
-		position: relative;
-		padding-block: 0.35rem;
-		color: var(--muted);
-		font-size: 0.82rem;
-		text-decoration: none;
-	}
-	.site-links :global(a)::after {
-		content: '';
-		position: absolute;
-		right: 0;
-		bottom: 0;
-		left: 0;
-		height: 1px;
-		background: var(--accent);
-		transform: scaleX(0);
-		transform-origin: right;
-		transition: transform 180ms ease-out;
-	}
-	.site-links :global(a:hover),
-	.site-links :global(a.active) {
-		color: var(--ink);
-	}
-	.site-links :global(a:hover)::after,
-	.site-links :global(a.active)::after {
-		transform: scaleX(1);
-		transform-origin: left;
-	}
-	@media (max-width: 40rem) {
-		.site-nav { height: 4.5rem; }
-		.site-links { gap: 1.15rem; }
-	}
+  .ds-site-header {
+    border-bottom: 1px solid var(--line);
+    view-transition-name: site-header;
+  }
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 104px;
+    gap: 1rem;
+  }
+  .ds-brand {
+    display: inline-block;
+    min-height: 44px;
+    align-content: center;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.85rem;
+    text-decoration: none;
+    white-space: nowrap;
+    letter-spacing: -0.02em;
+  }
+  .ds-brand span {
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 500;
+    margin-left: 1.1rem;
+    letter-spacing: 0;
+  }
+  .ds-nav-links {
+    display: flex;
+    gap: 2rem;
+  }
+  .ds-nav-links a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    padding: 0.65rem 0;
+    position: relative;
+    text-decoration: none;
+  }
+  .ds-nav-links a::after {
+    content: "";
+    position: absolute;
+    bottom: 0.25rem;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 240ms var(--ease);
+  }
+  .ds-nav-links a:hover,
+  .ds-nav-links a:focus-visible,
+  .ds-nav-links a[aria-current] {
+    color: var(--accent);
+  }
+  .ds-nav-links a:hover::after,
+  .ds-nav-links a:focus-visible::after,
+  .ds-nav-links a[aria-current]::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  @media (max-width: 40rem) {
+    nav {
+      min-height: 80px;
+    }
+    .ds-brand {
+      font-size: 1.35rem;
+    }
+    .ds-brand span {
+      margin-left: 0.65rem;
+      font-size: 0.8rem;
+    }
+    .ds-nav-links {
+      gap: 0.65rem;
+    }
+    .ds-nav-links a {
+      font-size: 0.8rem;
+    }
+  }
+  @media (max-width: 23rem) {
+    nav {
+      gap: 0.5rem;
+    }
+    .ds-brand {
+      font-size: 1.15rem;
+    }
+    .ds-brand span {
+      margin-left: 0.4rem;
+      font-size: 0.7rem;
+    }
+    .ds-nav-links {
+      gap: 0;
+    }
+  }
 </style>

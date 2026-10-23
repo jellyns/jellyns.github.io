@@ -1,0 +1,46 @@
+---
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+// Keep the original title text; bind the short version label to its preceding term.
+const match = title.match(/^(.*?)(\/goal\s*（新）)$/u);
+// Keep short Chinese words intact when the heading balances across lines.
+const words = [
+  ...new Intl.Segmenter("zh-CN", { granularity: "word" }).segment(
+    match ? match[1] : title,
+  ),
+];
+---
+
+{words.map(({ segment, isWordLike }) =>
+  isWordLike &&
+  segment.length > 1 &&
+  segment.length <= 8 &&
+  /\p{Script=Han}/u.test(segment) ? (
+    <span class="ds-title-word">{segment}</span>
+  ) : (
+    segment
+  ),
+)}
+{match && (
+  <span class="ds-title-tail">
+    /goal <small>（新）</small>
+  </span>
+)}
+<style>
+  .ds-title-word {
+    white-space: nowrap;
+  }
+  .ds-title-tail {
+    white-space: nowrap;
+  }
+  small {
+    font-family: var(--font-sans);
+    font-size: max(0.38em, 0.75rem);
+    font-weight: 400;
+    vertical-align: middle;
+    color: var(--muted);
+    letter-spacing: 0;
+  }
+</style>

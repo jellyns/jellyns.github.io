@@ -31,3 +31,5 @@ src/assets/blog-placeholder-*.jpg
 .impeccable/screenshots/
 .impeccable/mocks/blog-surface-brief.md
 .impeccable/mocks/viewport-probe.html
+# local design comparisons, screenshots, and diagnostic records
+.impeccable/mocks/2026-10-22-redesign/

@@ -1,22 +1,37 @@
 ---
 interface Props {
-	date: Date;
-	format?: 'long' | 'compact';
+  date: Date;
+  format?: "long" | "compact" | "month-day";
 }
 
-const { date, format = 'long' } = Astro.props;
+const { date, format = "long" } = Astro.props;
 const displayDate =
-	format === 'compact'
-		? [date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate()]
-				.map((part, index) => (index === 0 ? String(part) : String(part).padStart(2, '0')))
-				.join('.')
-		: date.toLocaleDateString('zh-CN', {
-				year: 'numeric',
-				month: 'long',
-				day: 'numeric',
-			});
+  format !== "long"
+    ? [date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate()]
+        .map((part, index) =>
+          index === 0 ? String(part) : String(part).padStart(2, "0"),
+        )
+        .slice(format === "month-day" ? 1 : 0)
+        .join(".")
+    : date.toLocaleDateString("zh-CN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
 ---
 
-<time datetime={date.toISOString()}>
-	{displayDate}
+<time
+  datetime={date.toISOString()}
+  aria-label={
+    format === "month-day"
+      ? date.toLocaleDateString("zh-CN", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          timeZone: "UTC",
+        })
+      : undefined
+  }
+>
+  {displayDate}
 </time>

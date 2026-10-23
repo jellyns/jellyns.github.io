@@ -1,5 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="乙辛Zmod31">
-  <rect width="128" height="128" rx="20" fill="#152c35" />
-  <rect x="18" y="18" width="22" height="4" fill="#34a9a2" />
-  <text x="64" y="88" fill="#f8faf9" font-family="sans-serif" font-size="72" font-weight="700" text-anchor="middle">乙</text>
+  <rect width="128" height="128" rx="16" fill="#a13c32" />
+  <text x="64" y="91" fill="#faf9f6" font-family="serif" font-size="80" font-weight="600" text-anchor="middle">乙</text>
 </svg>

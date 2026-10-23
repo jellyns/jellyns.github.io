@@ -1,0 +1,150 @@
+---
+import type { CollectionEntry } from "astro:content";
+import FormattedDate from "./FormattedDate.astro";
+import PostTitle from "./PostTitle.astro";
+interface Props {
+  post: CollectionEntry<"blog">;
+  featured?: boolean;
+  compact?: boolean;
+}
+const { post, featured = false, compact = false } = Astro.props;
+const titleId = `entry-${post.id}`;
+const Heading = compact ? "h3" : "h2";
+---
+
+<article
+  class:list={[
+    "ds-post-entry",
+    { "ds-post-featured": featured, "ds-post-compact": compact },
+  ]}
+>
+  <a
+    href={`/blog/${post.id}/`}
+    class="ds-post-link ds-entry-surface"
+    aria-labelledby={titleId}
+    data-post-link
+  >
+    <div class="ds-entry-meta ds-meta">
+      {featured && <span class="ds-latest">最新文章</span>}
+      <FormattedDate
+        date={post.data.pubDate}
+        format={compact ? "month-day" : "compact"}
+      />
+    </div>
+    <div class="ds-entry-heading">
+      <Heading
+        class="ds-entry-title"
+        id={titleId}
+        data-post-title={`post-${post.id}`}
+      >
+        <PostTitle title={post.data.title} />
+      </Heading>
+    </div>
+    {!compact && <p>{post.data.description}</p>}
+  </a>
+</article>
+<style>
+  .ds-post-entry {
+    position: relative;
+    min-width: 0;
+    border-top: 1px solid var(--line);
+  }
+  .ds-post-link {
+    display: block;
+    height: 100%;
+    padding: 1.65rem 0 1.9rem;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .ds-entry-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    margin-bottom: 1.1rem;
+    font-size: 0.75rem;
+  }
+  .ds-latest {
+    color: var(--accent);
+  }
+  .ds-entry-heading {
+    display: block;
+  }
+  .ds-entry-title {
+    margin: 0;
+    font-size: clamp(1.4rem, 2.1vw, 1.85rem);
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+    transition: color 180ms var(--ease);
+  }
+  p {
+    max-width: 35rem;
+    margin: 1rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.9;
+    color: var(--muted);
+  }
+  .ds-post-link:hover .ds-entry-title,
+  .ds-post-link:focus-visible .ds-entry-title {
+    color: var(--accent-dark);
+  }
+  .ds-post-link:focus-visible {
+    outline-offset: -4px;
+  }
+  .ds-post-featured {
+    grid-column: 1 / -1;
+  }
+  .ds-post-featured .ds-post-link {
+    padding-block: 2rem 2.7rem;
+  }
+  .ds-post-featured .ds-entry-title {
+    max-width: 18em;
+    font-size: clamp(2.1rem, 3.65vw, 3.3rem);
+    line-height: 1.5;
+    letter-spacing: -0.025em;
+  }
+  .ds-post-featured p {
+    font-size: 1rem;
+    max-width: 38rem;
+  }
+  .ds-post-compact .ds-post-link {
+    display: grid;
+    grid-template-columns: 4rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 1.5rem;
+    padding-block: 1.5rem;
+  }
+  .ds-post-compact .ds-entry-meta {
+    margin: 0;
+  }
+  .ds-post-compact .ds-entry-title {
+    font-size: clamp(1.25rem, 1.8vw, 1.65rem);
+    line-height: 1.65;
+  }
+  @media (max-width: 44rem) {
+    .ds-post-compact .ds-post-link {
+      grid-template-columns: 3rem minmax(0, 1fr);
+      gap: 1rem;
+      padding-block: 1.25rem;
+    }
+    .ds-post-compact .ds-entry-title {
+      font-size: 1.2rem;
+    }
+
+    .ds-post-link {
+      padding: 1.4rem 0 1.6rem;
+    }
+    .ds-post-featured .ds-post-link {
+      padding-block: 1.5rem 2rem;
+    }
+    .ds-post-featured .ds-entry-title {
+      font-size: 2rem;
+    }
+    .ds-post-featured p {
+      font-size: 0.925rem;
+    }
+    .ds-entry-meta {
+      margin-bottom: 0.85rem;
+    }
+  }
+</style>

@@ -1,0 +1,41 @@
+---
+import type { CollectionEntry } from "astro:content";
+import PostEntry from "./PostEntry.astro";
+interface Props {
+  posts: CollectionEntry<"blog">[];
+  featured?: boolean;
+  compact?: boolean;
+}
+const { posts, featured = false, compact = false } = Astro.props;
+---
+
+<section
+  class:list={["ds-post-collection", { "ds-post-spread": featured }]}
+  aria-label="文章目录"
+  data-post-collection
+>
+  {posts.map((post, index) => (
+    <PostEntry
+      post={post}
+      featured={featured && index === 0}
+      compact={compact}
+    />
+  ))}
+</section>
+<style>
+  .ds-post-collection {
+    position: relative;
+    isolation: isolate;
+    min-width: 0;
+  }
+  .ds-post-spread {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 2.5rem;
+  }
+  @media (max-width: 60rem) {
+    .ds-post-spread {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

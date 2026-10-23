@@ -1,26 +1,61 @@
 ---
-import { type CollectionEntry, getCollection, render } from 'astro:content';
-import BlogPost from '../../layouts/BlogPost.astro';
+import { type CollectionEntry, getCollection, render } from "astro:content";
+import BlogPost from "../../layouts/BlogPost.astro";
 
 export async function getStaticPaths() {
-	const posts = await getCollection('blog');
-	return posts.map((post) => ({
-		params: { slug: post.id },
-		props: post,
-	}));
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: post,
+  }));
 }
-type Props = CollectionEntry<'blog'>;
+type Props = CollectionEntry<"blog">;
 
 const post = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 const plainText = post.body
-	.replace(/```[\s\S]*?```/g, '')
-	.replace(/!\[[^\]]*\]\([^)]*\)/g, '')
-	.replace(/[#>*_`\[\]()-]/g, '')
-	.replace(/\s+/g, '');
+  .replace(/```[\s\S]*?```/g, "")
+  .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+  .replace(/[#>*_`\[\]()-]/g, "")
+  .replace(/\s+/g, "");
 const readingTime = Math.max(1, Math.ceil(plainText.length / 500));
+const otherPosts = (await getCollection("blog"))
+  .filter((entry) => entry.id !== post.id)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const morePosts = new Map<
+  string,
+  { title: string; href: string; description?: string; related: boolean }
+>();
+// Explicit relationships survive as the archive grows; recent articles fill spare places.
+for (const related of post.data.relatedPosts ?? []) {
+  const match = otherPosts.find(
+    (entry) => `/blog/${entry.id}/` === related.href,
+  );
+  morePosts.set(related.href, {
+    ...related,
+    description: match?.data.description,
+    related: true,
+  });
+}
+for (const entry of otherPosts) {
+  if (morePosts.size >= 2) break;
+  const href = `/blog/${entry.id}/`;
+  if (!morePosts.has(href))
+    morePosts.set(href, {
+      href,
+      title: entry.data.title,
+      description: entry.data.description,
+      related: false,
+    });
+}
 ---
 
-<BlogPost {...post.data} readingTime={readingTime}>
-	<Content />
+<BlogPost
+  {...post.data}
+  readingTime={readingTime}
+  slug={post.id}
+  headings={headings}
+  morePosts={[...morePosts.values()]}
+>
+  <Content />
 </BlogPost>

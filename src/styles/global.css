@@ -1,131 +1,231 @@
+@import "./display-font.css";
 :root {
-	--paper: #f8faf9;
-	--paper-strong: #ffffff;
-	--ink: #152c35;
-	--muted: #5d7075;
-	--line: #cdd8d7;
-	--accent: #137d78;
-	--accent-dark: #0d625e;
-	--accent-soft: #dceeed;
-	--site-width: 70rem;
-	--reading-width: 43.5rem;
-	--page-gutter: clamp(1.25rem, 5vw, 4rem);
-	--font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-		"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
-	color-scheme: light;
+  --paper: #faf9f6;
+  --ink: #242526;
+  --prose-ink: #343536;
+  --muted: #6b6863;
+  --line: #d8d3cc;
+  --accent: #a13c32;
+  --accent-dark: #863228;
+  --accent-soft: #f0e3dd;
+  --code-surface: #efede7;
+  --site-width: 75rem;
+  --reading-width: 42rem;
+  --page-gutter: clamp(1.25rem, 4.5vw, 4.5rem);
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-display:
+    "Editorial Song", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC",
+    SimSun, Georgia, serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: light;
 }
-
+* {
+  box-sizing: border-box;
+}
 html {
-	background: var(--paper);
-	scroll-behavior: smooth;
+  background: var(--paper);
+  scrollbar-gutter: stable;
+  scroll-behavior: smooth;
+  scroll-padding-top: 2rem;
 }
-
 body {
-	margin: 0;
-	min-width: 20rem;
-	min-height: 100vh;
-	background: var(--paper);
-	color: var(--ink);
-	font-family: var(--font-sans);
-	font-size: 16px;
-	line-height: 1.75;
-	text-rendering: optimizeLegibility;
-	-webkit-font-smoothing: antialiased;
+  margin: 0;
+  min-width: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
 }
-
-main {
-	min-height: 60vh;
-}
-
 h1,
 h2,
-h3,
-h4,
-h5,
-h6 {
-	color: var(--ink);
-	font-weight: 680;
-	line-height: 1.3;
-	text-wrap: balance;
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.45;
+  text-wrap: pretty;
 }
-
-strong,
-b {
-	font-weight: 700;
-}
-
 a {
-	color: var(--accent-dark);
-	text-decoration-thickness: 1px;
-	text-underline-offset: 0.18em;
+  color: var(--accent-dark);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  transition: color 180ms var(--ease);
 }
-
 a:hover {
-	color: var(--accent);
+  color: var(--accent);
 }
-
 button,
 input,
-textarea {
-	font: inherit;
+textarea,
+summary {
+  font: inherit;
 }
-
+button,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+}
 img {
-	display: block;
-	max-width: 100%;
-	height: auto;
+  display: block;
+  max-width: 100%;
+  height: auto;
 }
-
 ::selection {
-	background: var(--accent-soft);
-	color: var(--ink);
+  background: var(--accent-soft);
+  color: var(--ink);
 }
-
 :focus-visible {
-	outline: 2px solid var(--accent);
-	outline-offset: 4px;
+  outline: 2px solid var(--accent);
+  outline-offset: 5px;
 }
-
+.ds-container {
+  width: min(var(--site-width), calc(100% - 2 * var(--page-gutter)));
+  margin-inline: auto;
+}
+.ds-meta {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.ds-entry-surface {
+  position: relative;
+  isolation: isolate;
+}
+.ds-entry-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0 -1rem;
+  z-index: -1;
+  background: var(--code-surface);
+  opacity: 0;
+  transition: opacity 240ms var(--ease);
+  pointer-events: none;
+}
+.ds-entry-surface::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 360ms var(--ease);
+  pointer-events: none;
+}
+.ds-entry-surface:focus-visible::before {
+  opacity: 0.65;
+}
+.ds-entry-surface:focus-visible::after {
+  transform: scaleX(1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .ds-entry-surface:hover::before {
+    opacity: 0.65;
+  }
+  .ds-entry-surface:hover::after {
+    transform: scaleX(1);
+  }
+}
+.ds-entry-surface:active::before {
+  opacity: 1;
+}
 .skip-link {
-	position: fixed;
-	z-index: 100;
-	top: 0.75rem;
-	left: 0.75rem;
-	padding: 0.6rem 0.8rem;
-	background: var(--ink);
-	color: var(--paper);
-	font-size: 0.85rem;
-	text-decoration: none;
-	transform: translateY(-160%);
-	transition: transform 160ms ease-out;
+  position: fixed;
+  z-index: 100;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.6rem 1rem;
+  background: var(--ink);
+  color: var(--paper);
+  transform: translateY(-200%);
 }
-
 .skip-link:focus {
-	transform: translateY(0);
+  transform: none;
 }
-
 .sr-only {
-	position: absolute !important;
-	width: 1px;
-	height: 1px;
-	padding: 0;
-	margin: -1px;
-	overflow: hidden;
-	clip: rect(0, 0, 0, 0);
-	white-space: nowrap;
-	border: 0;
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
-
+/* Astro owns navigation. Native cross-document transitions can be interrupted
+   when an embedded browser clears its outgoing graphics before page reveal. */
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-group(*) {
+  animation-duration: 460ms;
+  animation-timing-function: var(--ease);
+}
+::view-transition-old(root) {
+  animation: ds-out 150ms ease-out both;
+}
+::view-transition-new(root) {
+  animation: ds-in 360ms 60ms var(--ease) both;
+}
+/* The masthead and author remain visual anchors while the title changes place. */
+::view-transition-old(site-header),
+::view-transition-new(site-header),
+::view-transition-old(site-author),
+::view-transition-new(site-author) {
+  mix-blend-mode: normal;
+  animation: none;
+}
+::view-transition-old(site-header),
+::view-transition-old(site-author) {
+  display: none;
+}
+html[data-astro-transition] {
+  scroll-behavior: auto;
+}
+@keyframes ds-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes ds-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-	html {
-		scroll-behavior: auto;
-	}
-	*,
-	*::before,
-	*::after {
-		scroll-behavior: auto !important;
-		animation-duration: 0.01ms !important;
-		animation-iteration-count: 1 !important;
-		transition-duration: 0.01ms !important;
-	}
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media print {
+  .ds-site-header,
+  .ds-site-footer,
+  .ds-toc,
+  .ds-edition {
+    display: none !important;
+  }
+  body {
+    background: white;
+    color: black;
+  }
 }
